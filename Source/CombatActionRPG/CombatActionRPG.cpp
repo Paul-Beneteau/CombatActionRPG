@@ -5,4 +5,4 @@
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, CombatActionRPG, "CombatActionRPG" );
 
-DEFINE_LOG_CATEGORY(LogCom)
+DEFINE_LOG_CATEGORY(ComLog)

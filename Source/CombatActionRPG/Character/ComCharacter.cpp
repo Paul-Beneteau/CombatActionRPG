@@ -9,12 +9,15 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Engine/World.h"
 #include "Engine/LocalPlayer.h"
+#include "AbilitySystemComponent.h"
+#include "CombatActionRPG/CombatActionRPG.h"
 
 AComCharacter::AComCharacter()
 {	
-	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
+	
+	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	// Don't want arm to rotate when character does
@@ -34,20 +37,26 @@ AComCharacter::AComCharacter()
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 500.f, 0.f);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 600.f, 0.f);
 	GetCharacterMovement()->bConstrainToPlane = true;
 	GetCharacterMovement()->bSnapToPlaneAtStart = true;
-}
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
-void AComCharacter::BeginPlay()
-{
-	Super::BeginPlay();	
+	// Increase update frequency for GAS components
+	SetNetUpdateFrequency(100.0f);
+	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComp"));
 }
 
 void AComCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
+	if (PlayerData == nullptr)
+	{
+		UE_LOG(ComLog, Error, TEXT("AComCharacter: Player data asset has not been set"));
+		return;
+	}
+	
 	const APlayerController* PlayerController { GetController<APlayerController>() };
 	check(PlayerController);	
 	const ULocalPlayer* LocalPlayer { PlayerController->GetLocalPlayer() };
@@ -55,23 +64,52 @@ void AComCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	
 	if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 	{
-		InputSubsystem->AddMappingContext(DefaultMappingContext, 0);
+		InputSubsystem->AddMappingContext(PlayerData->DefaultInputContext, 0);
 	}
 
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		// Setup mouse input events
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &AComCharacter::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &AComCharacter::OnSetDestinationTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &AComCharacter::OnSetDestinationReleased);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &AComCharacter::OnSetDestinationReleased);
+		// Bind movement input
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Started, this, &AComCharacter::OnInputStarted);
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Triggered, this, &AComCharacter::OnSetDestinationTriggered);
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Completed, this, &AComCharacter::OnSetDestinationReleased);
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Canceled, this, &AComCharacter::OnSetDestinationReleased);
+
+		// Bind Abilities input
+		for (FComAbilityInput AbilityInput : PlayerData->InitialAbilities)
+		{
+			EnhancedInputComponent->BindAction(AbilityInput.InputAction, ETriggerEvent::Started, this, &AComCharacter::OnActivateAbilityStarted, AbilityInput.Ability);
+		}		
 	}
+}
+
+void AComCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// Initialize GAS
+	AbilitySystemComp->InitAbilityActorInfo(this, this);
+	
+	for (FComAbilityInput AbilityInput : PlayerData->InitialAbilities)
+	{
+		AbilitySystemComp->GiveAbility(FGameplayAbilitySpec(AbilityInput.Ability));
+	}
+}
+
+UAbilitySystemComponent* AComCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComp;
+}
+
+void AComCharacter::OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability)
+{
+	AbilitySystemComp->TryActivateAbilityByClass(Ability);
 }
 
 void AComCharacter::OnInputStarted()
 {
-	GetController()->StopMovement();
+	GetController()->StopMovement();	
 }
 
 // Move toward destination while input is triggered

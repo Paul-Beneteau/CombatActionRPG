@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
+#include "AttributeSet.h"
+#include "ComPlayerDataAsset.h"
 #include "ComCharacter.generated.h"
 
 class USpringArmComponent;
@@ -10,20 +13,23 @@ class UInputAction;
 class UInputMappingContext;
 
 UCLASS()
-class COMBATACTIONRPG_API AComCharacter : public ACharacter
+class COMBATACTIONRPG_API AComCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	UInputMappingContext* DefaultMappingContext;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	UInputAction* SetDestinationClickAction;
-	
+public:	
 	AComCharacter();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void PossessedBy(AController* NewController) override;
+	
+	// Implements IAbilitySystemInterface
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UFUNCTION()
+	void OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability);
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	UCameraComponent* CameraComp;
@@ -34,8 +40,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	float ClickToDestinationThreshold { 0.3f };	
 	float SetDestinationTriggerDuration { 0.0f };
-	
-	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UAbilitySystemComponent* AbilitySystemComp;
+	//UPROPERTY()
+	//TObjectPtr<UAttributeSet> ClairAttributeSet;
+
+	UPROPERTY(EditDefaultsOnly, Category="Data")
+	TObjectPtr<UComPlayerDataAsset> PlayerData;
 
 	/** Input handlers for SetDestination action. */
 	void OnInputStarted();
