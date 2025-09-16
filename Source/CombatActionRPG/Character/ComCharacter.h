@@ -7,6 +7,7 @@
 #include "ComPlayerDataAsset.h"
 #include "ComCharacter.generated.h"
 
+class UComCombatAttributeSet;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -41,10 +42,10 @@ protected:
 	float ClickToDestinationThreshold { 0.3f };	
 	float SetDestinationTriggerDuration { 0.0f };
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
 	UAbilitySystemComponent* AbilitySystemComp;
-	//UPROPERTY()
-	//TObjectPtr<UAttributeSet> ClairAttributeSet;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
+	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
 
 	UPROPERTY(EditDefaultsOnly, Category="Data")
 	TObjectPtr<UComPlayerDataAsset> PlayerData;

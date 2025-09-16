@@ -17,12 +17,10 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("ComProjectileAbility"));
-
-	AComCharacter* Character = CastChecked<AComCharacter>(GetAvatarActorFromActorInfo());
+	AComCharacter* Character { CastChecked<AComCharacter>(GetAvatarActorFromActorInfo()) };
 
 	// Spawn a projectile in the direction of the cursor click
-	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
+	if (APlayerController* PlayerController { Cast<APlayerController>(Character->GetController()) } )
 	{
 		FHitResult Hit;
 		
@@ -45,7 +43,7 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 
 void UComProjectileAbility::SpawnProjectile()
 {
-	AComCharacter* Character = CastChecked<AComCharacter>(GetAvatarActorFromActorInfo());
+	AComCharacter* Character { CastChecked<AComCharacter>(GetAvatarActorFromActorInfo()) };
 
 	// Wait until character finish rotating
 	if (Character->ReachedDesiredRotation() == false)
@@ -66,10 +64,7 @@ void UComProjectileAbility::SpawnProjectile()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = Character;
 
-	AActor* Projectile = GetWorld()->SpawnActor<AActor>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams);
+	AActor* Projectile { GetWorld()->SpawnActor<AActor>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams) };
 	
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow,
-		FString::Printf(TEXT("UComProjectileAbility::SpawnProjectile(): %s"), *GetNameSafe(Projectile)));
-
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);
 }

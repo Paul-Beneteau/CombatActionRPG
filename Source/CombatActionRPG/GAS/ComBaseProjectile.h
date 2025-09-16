@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "ComBaseProjectile.generated.h"
 
+class UGameplayEffect;
 class USphereComponent;
 class UBoxComponent;
 class UProjectileMovementComponent;
@@ -34,12 +35,17 @@ protected:
 	TObjectPtr<UParticleSystemComponent> EffectComp;
 
 	// Effect when projectile is spawned
-	UPROPERTY(EditDefaultsOnly, Category = "Effect")
-	TObjectPtr<UParticleSystem> HitWorldEffect;
+	UPROPERTY(EditDefaultsOnly, Category = "Particle")
+	TObjectPtr<UParticleSystem> HitWorldParticleEffect;
 
 	// Effect when projectile hit an actor
-	UPROPERTY(EditDefaultsOnly, Category = "Effect")
-	TObjectPtr<UParticleSystem> HitActorEffect;
+	UPROPERTY(EditDefaultsOnly, Category = "Particle")
+	TObjectPtr<UParticleSystem> HitActorParticleEffect;
+
+	// Gameplay effect when actor is hit
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GAS")
+	TSubclassOf<UGameplayEffect> HitActorGameplayEffect;
+	
 	
 	UFUNCTION()
 	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

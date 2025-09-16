@@ -1,11 +1,17 @@
 #include "ComBaseProjectile.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayEffect.h"
 #include "CombatActionRPG/CombatActionRPG.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "AbilitySystemInterface.h"
+#include "CombatActionRPG/Character/ComCharacter.h"
+#include "CombatActionRPG/Character/ComNonPlayerCharacter.h"
 
 AComBaseProjectile::AComBaseProjectile()
 {
@@ -39,9 +45,9 @@ void AComBaseProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HitWorldEffect)
+	if (HitWorldParticleEffect)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, HitWorldEffect, GetActorLocation(), GetActorRotation());
+		UGameplayStatics::SpawnEmitterAtLocation(this, HitWorldParticleEffect, GetActorLocation(), GetActorRotation());
 	}
 	else
 	{
@@ -59,14 +65,31 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 	
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("AComBaseProjectile::OnActorOverlap"));
 
-	if (HitActorEffect)
+	if (HitActorParticleEffect)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, HitActorEffect, GetActorLocation(), GetActorRotation());
+		UGameplayStatics::SpawnEmitterAtLocation(this, HitActorParticleEffect, GetActorLocation(), GetActorRotation());
 	}
 	else
 	{
 		UE_LOG(ComLog, Warning, TEXT("AComBaseProjectile: HitActorEffect has not been set"));
 	}
+
+	AComCharacter* PlayerCharacter { Cast<AComCharacter>(GetInstigator())};
+	AComNonPlayerCharacter* NonPlayerCharacter { Cast<AComNonPlayerCharacter>(OtherActor)};
+	
+	if (PlayerCharacter && NonPlayerCharacter)
+	{
+		UAbilitySystemComponent* TargetAbilitySystemComp = NonPlayerCharacter->GetAbilitySystemComponent();
+		check(TargetAbilitySystemComp);
+		UAbilitySystemComponent* SourceAbilitySystemComp = PlayerCharacter->GetAbilitySystemComponent();
+		check(SourceAbilitySystemComp);
+		SourceAbilitySystemComp->ApplyGameplayEffectToTarget(HitActorGameplayEffect->GetDefaultObject<UGameplayEffect>(),
+			TargetAbilitySystemComp, 1.0f, SourceAbilitySystemComp->MakeEffectContext());
+	}
+	else
+	{
+		UE_LOG(ComLog, Error, TEXT("AComBaseProjectile: Can't find instigator or target"));
+	}	
 	
 	Destroy();
 }

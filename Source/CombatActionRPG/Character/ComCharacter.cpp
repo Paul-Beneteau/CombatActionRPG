@@ -11,6 +11,7 @@
 #include "Engine/LocalPlayer.h"
 #include "AbilitySystemComponent.h"
 #include "CombatActionRPG/CombatActionRPG.h"
+#include "CombatActionRPG/GAS/ComCombatAttributeSet.h"
 
 AComCharacter::AComCharacter()
 {	
@@ -45,6 +46,8 @@ AComCharacter::AComCharacter()
 	// Increase update frequency for GAS components
 	SetNetUpdateFrequency(100.0f);
 	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComp"));
+	CombatAttributeSet = CreateDefaultSubobject<UComCombatAttributeSet>(TEXT("CombatAttributeSet"));
+	AbilitySystemComp->AddAttributeSetSubobject<UComCombatAttributeSet>(CombatAttributeSet);
 }
 
 void AComCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -62,13 +65,13 @@ void AComCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	const ULocalPlayer* LocalPlayer { PlayerController->GetLocalPlayer() };
 	check(LocalPlayer);	
 	
-	if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+	if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem { LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>() })
 	{
 		InputSubsystem->AddMappingContext(PlayerData->DefaultInputContext, 0);
 	}
 
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	if (UEnhancedInputComponent* EnhancedInputComponent { Cast<UEnhancedInputComponent>(InputComponent) })
 	{
 		// Bind movement input
 		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Started, this, &AComCharacter::OnInputStarted);
@@ -117,7 +120,7 @@ void AComCharacter::OnSetDestinationTriggered()
 {
 	SetDestinationTriggerDuration += GetWorld()->GetDeltaSeconds();
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	if (APlayerController* PlayerController { Cast<APlayerController>(GetController()) })
 	{
 		// Get destination location at the cursor position
 		FHitResult Hit;
@@ -137,7 +140,7 @@ void AComCharacter::OnSetDestinationReleased()
 	if (SetDestinationTriggerDuration <= ClickToDestinationThreshold)
 	{
 		// Get destination location at the cursor position 
-		if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+		if (APlayerController* PlayerController { Cast<APlayerController>(GetController()) })
 		{
 			FHitResult Hit;
 			if (PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit))
