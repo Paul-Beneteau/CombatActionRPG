@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "ComBaseProjectile.generated.h"
 
+class UGameplayAbility;
+struct FGameplayTagContainer;
 class UGameplayEffect;
 class USphereComponent;
 class UBoxComponent;
@@ -14,7 +16,13 @@ class COMBATACTIONRPG_API AComBaseProjectile : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
+	// Gameplay effect when actor is hit
+	TSubclassOf<UGameplayEffect> HitActorGameplayEffect;
+
+	UPROPERTY()
+	TObjectPtr<UGameplayAbility> InstigatorAbility;
+	
 	AComBaseProjectile();
 	
 	virtual void PostInitializeComponents() override;
@@ -41,11 +49,6 @@ protected:
 	// Effect when projectile hit an actor
 	UPROPERTY(EditDefaultsOnly, Category = "Particle")
 	TObjectPtr<UParticleSystem> HitActorParticleEffect;
-
-	// Gameplay effect when actor is hit
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GAS")
-	TSubclassOf<UGameplayEffect> HitActorGameplayEffect;
-	
 	
 	UFUNCTION()
 	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

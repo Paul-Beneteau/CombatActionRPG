@@ -18,6 +18,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Projectile")
 	TSubclassOf<AActor> ProjectileClass;
 
+	// Gameplay effect when actor is hit
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GAS")
+	TSubclassOf<UGameplayEffect> ProjectileGameplayEffect;
+
 	FTimerHandle TimerHandle;
 	
 	UFUNCTION()

@@ -12,6 +12,7 @@
 #include "AbilitySystemComponent.h"
 #include "CombatActionRPG/CombatActionRPG.h"
 #include "CombatActionRPG/GAS/ComCombatAttributeSet.h"
+#include "CombatActionRPG/GAS/ComDamageModifierAttributeSet.h"
 
 AComCharacter::AComCharacter()
 {	
@@ -48,6 +49,8 @@ AComCharacter::AComCharacter()
 	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComp"));
 	CombatAttributeSet = CreateDefaultSubobject<UComCombatAttributeSet>(TEXT("CombatAttributeSet"));
 	AbilitySystemComp->AddAttributeSetSubobject<UComCombatAttributeSet>(CombatAttributeSet);
+	DamageAttributeSet = CreateDefaultSubobject<UComDamageModifierAttributeSet>(TEXT("DamageAttributeSet"));
+	AbilitySystemComp->AddAttributeSetSubobject<UComDamageModifierAttributeSet>(DamageAttributeSet);
 }
 
 void AComCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

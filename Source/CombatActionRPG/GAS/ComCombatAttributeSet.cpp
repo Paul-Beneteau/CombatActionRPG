@@ -57,11 +57,11 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	const FGameplayEffectContextHandle& EffectContext = Data.EffectSpec.GetEffectContext();
 	AActor* Instigator { EffectContext.GetOriginalInstigator() };
 	
-	if (Data.EvaluatedData.Attribute == GetHealthDamageAttribute())
+	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
 	{		
 		// Rounding to int so there isn't a float damage value
-		SetHealth(FMath::Clamp(FMath::RoundToInt(GetHealth() - GetHealthDamage()), 0.0f, GetMaxHealth()));
-		SetHealthDamage(0.0f);
+		SetHealth(FMath::Clamp(FMath::RoundToInt(GetHealth() - GetDamage()), 0.0f, GetMaxHealth()));
+		SetDamage(0.0f);
 	}	
 	else if (Data.EvaluatedData.Attribute == GetHealAttribute())
 	{
@@ -80,5 +80,9 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	else if (GetMana() != ManaBeforeChange)
 	{
 		OnManaChanged.Broadcast(Instigator, ManaBeforeChange, GetMana());
+	}
+	else if (Data.EvaluatedData.Attribute == GetBaseDamageAttribute())
+	{		
+		SetBaseDamage(GetBaseDamage());
 	}
 }

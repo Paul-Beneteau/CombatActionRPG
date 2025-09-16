@@ -20,7 +20,7 @@ class COMBATACTIONRPG_API UComCombatAttributeSet : public UAttributeSet
 public:
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, Health)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, MaxHealth)	
-	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, HealthDamage)
+	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, Damage)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, Heal)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, Mana)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, MaxMana)
@@ -45,9 +45,9 @@ protected:
 	
 	float HealthBeforeChange { 0.0f };
 
-	// Meta attribute that handle damage applied to the health
+	// Meta attribute that handle damage applied to the health. TODO: Rename with a more explicit name
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	FGameplayAttributeData HealthDamage;
+	FGameplayAttributeData Damage;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData Heal;
@@ -59,7 +59,7 @@ protected:
 	
 	float ManaBeforeChange { 0.0f };
 
-	// Base attack damage of the owner 
+	// Base attack damage of the owner
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData BaseDamage;
 };

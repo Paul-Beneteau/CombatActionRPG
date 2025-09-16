@@ -1,33 +1,88 @@
 #include "ComProjectileMagnitude.h"
 
+#include "AbilitySystemInterface.h"
 #include "ComCombatAttributeSet.h"
+#include "ComDamageModifierAttributeSet.h"
+#include "CombatActionRPG/CombatActionRPG.h"
 
-UComProjectileMagnitude::UComProjectileMagnitude()
-{
-	// Capture gameplay effect source instigator max health attribute
-	SourceBaseDamageDef.AttributeToCapture = UComCombatAttributeSet::GetBaseDamageAttribute();
-	SourceBaseDamageDef.AttributeSource = EGameplayEffectAttributeCaptureSource::Source;
-	SourceBaseDamageDef.bSnapshot = false;
-	
-	RelevantAttributesToCapture.Add(SourceBaseDamageDef);
-}
-
-// Return source instigator max health as base magnitude
 float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
-{	
-	const FGameplayTagContainer* SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
-	const FGameplayTagContainer* TargetTags = Spec.CapturedTargetTags.GetAggregatedTags();
-
-	FAggregatorEvaluateParameters EvaluationParameters;
-	EvaluationParameters.SourceTags = SourceTags;
-	EvaluationParameters.TargetTags = TargetTags;
-
-	// retrieve instigator max health
-	float SourceBaseDamage { 0.0f };
+{
+	IAbilitySystemInterface* Instigator = Cast<IAbilitySystemInterface>(Spec.GetEffectContext().GetInstigator());
+	if (Instigator == nullptr)
+	{
+		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find gameplay effect instigator"));
+		return 0.0f;
+	}
 	
-	GetCapturedAttributeMagnitude(SourceBaseDamageDef, Spec, EvaluationParameters, SourceBaseDamage);
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("UComProjectileMagnitude - BaseDamage: %f"), SourceBaseDamage));
+	UAbilitySystemComponent* AbilitySystemComp = Instigator->GetAbilitySystemComponent();
+	if (AbilitySystemComp == nullptr)
+	{
+		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find ability system component of instigator"));
+		return 0.0f;
+	}
 	
-	return SourceBaseDamage;
+	const UComDamageModifierAttributeSet* DamageModifierSet = Cast<UComDamageModifierAttributeSet>(AbilitySystemComp->GetAttributeSet(UComDamageModifierAttributeSet::StaticClass()));
+	if (DamageModifierSet == nullptr)
+	{
+		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find damage attribute set of instigator"));
+		return 0.0f;
+	}	
+
+	const UComCombatAttributeSet* CombatSet = Cast<UComCombatAttributeSet>(AbilitySystemComp->GetAttributeSet(UComCombatAttributeSet::StaticClass()));
+	if (CombatSet == nullptr)
+	{
+		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find combat attribute set of instigator"));
+		return 0.0f;
+	}
+
+	const UGameplayAbility* InstigatorAbility { Spec.GetEffectContext().GetAbility() };
+	
+	if (DamageModifierSet == nullptr)
+	{
+		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find gameplay ability instigator"));
+		return 0.0f;
+	}
+
+	// Damage percent added additively to the total damage 
+	float AdditiveDamageModifier { 1 };
+
+	TArray<FComDamageData*> AdditiveDamageModifierRows;
+	AdditiveDamageModifierDataTable->GetAllRows<FComDamageData>(FString(""), AdditiveDamageModifierRows);
+	
+	for (FComDamageData* AdditiveDamageModifierRow : AdditiveDamageModifierRows)
+	{
+		FGameplayTag RequiredTag = AdditiveDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
+		
+		// If there is no required tag or the instigator ability has the required tag 
+		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->AbilityTags.HasTag(RequiredTag)))
+		{
+			// Add the additive damage attribute from the instigator attribute set
+			AdditiveDamageModifier += AdditiveDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100;
+		}
+	}
+
+	TArray<FComDamageData*> MultiplicativeDamageModifierRows;
+	MultiplicativeDamageModifierDataTable->GetAllRows<FComDamageData>(FString(""), MultiplicativeDamageModifierRows);
+	
+	// Damage percent added multiplicatively to the total damage
+	float MultiplicativeDamageModifier { 1 };
+
+	// Iterates over every multiplicative damage type 
+	for (FComDamageData* MultiplicativeDamageRow : MultiplicativeDamageModifierRows)
+	{
+		FGameplayTag RequiredTag = MultiplicativeDamageRow->RequiredTag.Get(FGameplayTag::EmptyTag);
+
+		// If there is no required tag or the instigator ability has the required tag 
+		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->AbilityTags.HasTag(RequiredTag)))			
+		{
+			// Add the multiplicative damage attribute from the instigator attribute set
+			MultiplicativeDamageModifier *= (1 + (MultiplicativeDamageRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100));
+		}
+	}
+	
+	float Damage = { CombatSet->GetBaseDamage() * AdditiveDamageModifier * MultiplicativeDamageModifier };
+	
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("UComProjectileMagnitude - Damage: %f"), Damage));
+	
+	return Damage;
 }

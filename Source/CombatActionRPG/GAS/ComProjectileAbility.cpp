@@ -1,6 +1,7 @@
 #include "ComProjectileAbility.h"
 
 #include "AssetTypeCategories.h"
+#include "ComBaseProjectile.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "CombatActionRPG/Character/ComCharacter.h"
 #include "GameFramework/Character.h"
@@ -64,7 +65,11 @@ void UComProjectileAbility::SpawnProjectile()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = Character;
 
-	AActor* Projectile { GetWorld()->SpawnActor<AActor>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams) };
+	//GetAssetTags()
+
+	AComBaseProjectile* Projectile { GetWorld()->SpawnActor<AComBaseProjectile>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams) };
+	Projectile->HitActorGameplayEffect = ProjectileGameplayEffect;
+	Projectile->InstigatorAbility = this;
 	
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);
 }

@@ -7,6 +7,7 @@
 #include "ComPlayerDataAsset.h"
 #include "ComCharacter.generated.h"
 
+class UComDamageModifierAttributeSet;
 class UComCombatAttributeSet;
 class USpringArmComponent;
 class UCameraComponent;
@@ -46,7 +47,9 @@ protected:
 	UAbilitySystemComponent* AbilitySystemComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
 	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
+	TObjectPtr<UComDamageModifierAttributeSet> DamageAttributeSet;
+	
 	UPROPERTY(EditDefaultsOnly, Category="Data")
 	TObjectPtr<UComPlayerDataAsset> PlayerData;
 

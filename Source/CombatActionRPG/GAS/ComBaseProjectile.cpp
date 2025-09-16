@@ -62,8 +62,6 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 	{
 		return;
 	}
-	
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("AComBaseProjectile::OnActorOverlap"));
 
 	if (HitActorParticleEffect)
 	{
@@ -83,8 +81,12 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		check(TargetAbilitySystemComp);
 		UAbilitySystemComponent* SourceAbilitySystemComp = PlayerCharacter->GetAbilitySystemComponent();
 		check(SourceAbilitySystemComp);
+	
+		FGameplayEffectContextHandle EffectHandle = SourceAbilitySystemComp->MakeEffectContext();
+		EffectHandle.SetAbility(InstigatorAbility);
+		
 		SourceAbilitySystemComp->ApplyGameplayEffectToTarget(HitActorGameplayEffect->GetDefaultObject<UGameplayEffect>(),
-			TargetAbilitySystemComp, 1.0f, SourceAbilitySystemComp->MakeEffectContext());
+			TargetAbilitySystemComp, 1.0f, EffectHandle);
 	}
 	else
 	{
