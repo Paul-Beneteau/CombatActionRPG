@@ -56,16 +56,20 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 	const FGameplayEffectContextHandle& EffectContext = Data.EffectSpec.GetEffectContext();
 	AActor* Instigator { EffectContext.GetOriginalInstigator() };
-	
-	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
-	{		
+
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	{
+		SetHealth(FMath::Clamp<int32>(FMath::RoundToInt(GetHealth()), 0.0f, GetMaxHealth()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetDamageAttribute())
+	{
 		// Rounding to int so there isn't a float damage value
-		SetHealth(FMath::Clamp(FMath::RoundToInt(GetHealth() - GetDamage()), 0.0f, GetMaxHealth()));
+		SetHealth(FMath::Clamp<int32>(FMath::RoundToInt(GetHealth() - GetDamage()), 0.0f, GetMaxHealth()));
 		SetDamage(0.0f);
 	}	
 	else if (Data.EvaluatedData.Attribute == GetHealAttribute())
 	{
-		SetHealth(FMath::Clamp(GetHealth() + GetHeal(), 0.0f, GetMaxHealth()));
+		SetHealth(FMath::Clamp<int32>(FMath::RoundToInt(GetHealth() + GetHeal()), 0.0f, GetMaxHealth()));
 		SetHeal(0.0f);
 	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())

@@ -4,6 +4,7 @@
 #include "ComCombatAttributeSet.h"
 #include "ComDamageModifierAttributeSet.h"
 #include "CombatActionRPG/CombatActionRPG.h"
+#include "CombatActionRPG/ComDataTableRow.h"
 
 float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
 {
@@ -46,10 +47,10 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 	// Damage percent added additively to the total damage 
 	float AdditiveDamageModifier { 1 };
 
-	TArray<FComDamageData*> AdditiveDamageModifierRows;
-	AdditiveDamageModifierDataTable->GetAllRows<FComDamageData>(FString(""), AdditiveDamageModifierRows);
+	TArray<FComDamageModifierRow*> AdditiveDamageModifierRows;
+	AdditiveDamageModifierDataTable->GetAllRows<FComDamageModifierRow>(FString(""), AdditiveDamageModifierRows);
 	
-	for (FComDamageData* AdditiveDamageModifierRow : AdditiveDamageModifierRows)
+	for (FComDamageModifierRow* AdditiveDamageModifierRow : AdditiveDamageModifierRows)
 	{
 		FGameplayTag RequiredTag = AdditiveDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
 		
@@ -61,14 +62,14 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 		}
 	}
 
-	TArray<FComDamageData*> MultiplicativeDamageModifierRows;
-	MultiplicativeDamageModifierDataTable->GetAllRows<FComDamageData>(FString(""), MultiplicativeDamageModifierRows);
+	TArray<FComDamageModifierRow*> MultiplicativeDamageModifierRows;
+	MultiplicativeDamageModifierDataTable->GetAllRows<FComDamageModifierRow>(FString(""), MultiplicativeDamageModifierRows);
 	
 	// Damage percent added multiplicatively to the total damage
 	float MultiplicativeDamageModifier { 1 };
 
 	// Iterates over every multiplicative damage type 
-	for (FComDamageData* MultiplicativeDamageRow : MultiplicativeDamageModifierRows)
+	for (FComDamageModifierRow* MultiplicativeDamageRow : MultiplicativeDamageModifierRows)
 	{
 		FGameplayTag RequiredTag = MultiplicativeDamageRow->RequiredTag.Get(FGameplayTag::EmptyTag);
 

@@ -43,23 +43,21 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData MaxHealth;
 	
-	float HealthBeforeChange { 0.0f };
-
-	// Meta attribute that handle damage applied to the health. TODO: Rename with a more explicit name
-	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	FGameplayAttributeData Damage;
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	FGameplayAttributeData Heal;
-	
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData Mana;
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData MaxMana;
-	
+
+	float HealthBeforeChange { 0.0f };	
 	float ManaBeforeChange { 0.0f };
 
 	// Base attack damage of the owner
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData BaseDamage;
+
+	// Meta attribute that handle damage applied to the health. TODO: Rename with a more explicit name
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData Damage;	
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData Heal;
 };
