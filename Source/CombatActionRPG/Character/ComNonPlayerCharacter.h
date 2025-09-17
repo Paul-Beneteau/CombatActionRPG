@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "ComNonPlayerCharacter.generated.h"
 
+class UComAbilitySystemComponent;
 class UComCombatAttributeSet;
 
 UCLASS()
@@ -21,8 +22,8 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 protected:	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
-	UAbilitySystemComponent* AbilitySystemComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
+	UComAbilitySystemComponent* AbilitySystemComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
 };

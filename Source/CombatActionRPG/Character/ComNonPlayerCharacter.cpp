@@ -1,13 +1,14 @@
 #include "ComNonPlayerCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "CombatActionRPG/GAS/ComAbilitySystemComponent.h"
 #include "CombatActionRPG/GAS/ComCombatAttributeSet.h"
 
 AComNonPlayerCharacter::AComNonPlayerCharacter()
 {
 	// Increase update frequency for GAS components
 	SetNetUpdateFrequency(100.0f);
-	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComp"));
+	AbilitySystemComp = CreateDefaultSubobject<UComAbilitySystemComponent>(TEXT("AbilitySystemComp"));
 	CombatAttributeSet = CreateDefaultSubobject<UComCombatAttributeSet>(TEXT("CombatAttributeSet"));
 	AbilitySystemComp->AddAttributeSetSubobject<UComCombatAttributeSet>(CombatAttributeSet);
 }
