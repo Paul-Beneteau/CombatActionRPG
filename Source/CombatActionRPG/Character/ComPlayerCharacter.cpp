@@ -83,10 +83,17 @@ void AComPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Completed, this, &AComPlayerCharacter::OnSetDestinationReleased);
 		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Canceled, this, &AComPlayerCharacter::OnSetDestinationReleased);
 
-		// Bind Abilities input
+		// Bind Abilities input. Saves handle to modify dynamically input ability binding
 		for (FComAbilityInput AbilityInput : PlayerData->InitialAbilities)
-		{
-			EnhancedInputComponent->BindAction(AbilityInput.InputAction, ETriggerEvent::Started, this, &AComPlayerCharacter::OnActivateAbilityStarted, AbilityInput.Ability);
+		{			
+			if (UInputAction* InputAction = AbilityInput.InputAction.Get(nullptr))
+			{
+				uint32 Handle { EnhancedInputComponent->BindAction(InputAction, ETriggerEvent::Started,
+					this, &AComPlayerCharacter::OnActivateAbilityStarted, AbilityInput.Ability).GetHandle() };
+			
+				InputHandleMap.Add(InputAction, Handle);				
+				InputAbilityMap.Add(InputAction, AbilityInput.Ability);
+			}			
 		}		
 	}
 }
@@ -112,6 +119,29 @@ UAbilitySystemComponent* AComPlayerCharacter::GetAbilitySystemComponent() const
 void AComPlayerCharacter::OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability)
 {
 	AbilitySystemComp->TryActivateAbilityByClass(Ability);
+}
+
+void AComPlayerCharacter::SetInputActionAbility(UInputAction* InputAction, TSubclassOf<UGameplayAbility> Ability)
+{
+	check(InputAction && Ability);
+	
+	if (UEnhancedInputComponent* EnhancedInputComponent { Cast<UEnhancedInputComponent>(InputComponent) })
+	{
+		// Remove previous binding
+		EnhancedInputComponent->RemoveBindingByHandle(*InputHandleMap.Find(InputAction));
+		
+		InputHandleMap.Remove(InputAction);
+		
+		// Add new binding and save the handle
+		uint32 NewHandle { EnhancedInputComponent->BindAction(InputAction, ETriggerEvent::Started,
+	this, &AComPlayerCharacter::OnActivateAbilityStarted, Ability).GetHandle() };
+
+		InputHandleMap.Remove(InputAction);
+		InputHandleMap.Add(InputAction, NewHandle);
+
+		InputAbilityMap.Remove(InputAction);
+		InputAbilityMap.Add(InputAction, Ability);
+	}
 }
 
 void AComPlayerCharacter::OnInputStarted()

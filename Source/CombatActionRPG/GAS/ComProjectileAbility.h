@@ -23,6 +23,9 @@ protected:
 	TSubclassOf<UGameplayEffect> ProjectileGameplayEffect;
 
 	FTimerHandle TimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Icon")
+	TObjectPtr<UTexture2D> Icon;
 	
 	UFUNCTION()
 	void SpawnProjectile();

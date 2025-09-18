@@ -15,7 +15,7 @@ struct FComAbilityInput
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> InputAction;
+	TOptional<TObjectPtr<UInputAction>> InputAction;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UGameplayAbility> Ability;
