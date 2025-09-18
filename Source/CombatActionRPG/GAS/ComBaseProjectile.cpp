@@ -10,7 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "AbilitySystemInterface.h"
-#include "CombatActionRPG/Character/ComCharacter.h"
+#include "CombatActionRPG/Character/ComPlayerCharacter.h"
 #include "CombatActionRPG/Character/ComNonPlayerCharacter.h"
 
 AComBaseProjectile::AComBaseProjectile()
@@ -37,8 +37,6 @@ void AComBaseProjectile::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	MeshComp->OnComponentBeginOverlap.AddDynamic(this, &AComBaseProjectile::OnActorOverlap);
-
-	SetLifeSpan(3.0f);
 }
 
 void AComBaseProjectile::BeginPlay()
@@ -53,6 +51,8 @@ void AComBaseProjectile::BeginPlay()
 	{
 		UE_LOG(ComLog, Warning, TEXT("AComBaseProjectile: HitWorldEffect has not been set"));
 	}
+
+	SetLifeSpan(3.0f);
 }
 
 void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -72,7 +72,7 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		UE_LOG(ComLog, Warning, TEXT("AComBaseProjectile: HitActorEffect has not been set"));
 	}
 
-	AComCharacter* PlayerCharacter { Cast<AComCharacter>(GetInstigator())};
+	AComPlayerCharacter* PlayerCharacter { Cast<AComPlayerCharacter>(GetInstigator())};
 	AComNonPlayerCharacter* NonPlayerCharacter { Cast<AComNonPlayerCharacter>(OtherActor)};
 	
 	if (PlayerCharacter && NonPlayerCharacter)

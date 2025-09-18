@@ -2,11 +2,7 @@
 
 #include "GameplayEffectExtension.h"
 
-// TODO: Move initial values in data asset or initial gameplay effect
-UComDamageModifierAttributeSet::UComDamageModifierAttributeSet() :
-	IncreasedFireDamage(10),
-	IncreasedLightningDamage(10),
-	IncreasedColdDamage(10)
+UComDamageModifierAttributeSet::UComDamageModifierAttributeSet()
 {
 }
 
@@ -18,42 +14,53 @@ void UComDamageModifierAttributeSet::PreAttributeChange(const FGameplayAttribute
 	NewValue = FMath::Clamp<float>(NewValue, 0.0f, NewValue);
 }
 
+// Ensure value doesn't get below 0
 void UComDamageModifierAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
-	
-	if (Data.EvaluatedData.Attribute == GetIncreasedDamageAttribute())
-	{		
-		SetIncreasedDamage(GetIncreasedDamage());
-	}
-	
-	if (Data.EvaluatedData.Attribute == GetIncreasedProjectileDamageAttribute())
-	{		
-		SetIncreasedProjectileDamage(GetIncreasedProjectileDamage());
-	}
 
-	if (Data.EvaluatedData.Attribute == GetIncreasedFireDamageAttribute())
+	if (Data.EvaluatedData.Attribute == GetAddedPhysicalDamageAttribute())
 	{		
-		SetIncreasedFireDamage(GetIncreasedFireDamage());
+		SetAddedPhysicalDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetAddedPhysicalDamage()), 0.0f, GetAddedPhysicalDamage()));
 	}
-
-	if (Data.EvaluatedData.Attribute == GetIncreasedLightningDamageAttribute())
+	else if (Data.EvaluatedData.Attribute == GetAddedFireDamageAttribute())
 	{		
-		SetIncreasedLightningDamage(GetIncreasedLightningDamage());
+		SetAddedFireDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetAddedFireDamage()), 0.0f, GetAddedFireDamage()));
 	}
-
-	if (Data.EvaluatedData.Attribute == GetIncreasedColdDamageAttribute())
+	else if (Data.EvaluatedData.Attribute == GetAddedLightningDamageAttribute())
 	{		
-		SetIncreasedColdDamage(GetIncreasedColdDamage());
+		SetAddedLightningDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetAddedLightningDamage()), 0.0f, GetAddedLightningDamage()));
 	}
-	
-	if (Data.EvaluatedData.Attribute == GetIncreasedAttackDamageAttribute())
+	else if (Data.EvaluatedData.Attribute == GetAddedColdDamageAttribute())
 	{		
-		SetIncreasedColdDamage(GetIncreasedAttackDamage());
+		SetAddedColdDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetAddedColdDamage()), 0.0f, GetAddedColdDamage()));
 	}
-
-	if (Data.EvaluatedData.Attribute == GetMoreDamageAttribute())
+	else if (Data.EvaluatedData.Attribute == GetIncreasedDamageAttribute())
 	{		
-		SetMoreDamage(GetMoreDamage());
+		SetIncreasedDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetIncreasedDamage()), 0.0f, GetIncreasedDamage()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetIncreasedFireDamageAttribute())
+	{		
+		SetIncreasedFireDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetIncreasedFireDamage()), 0.0f, GetIncreasedFireDamage()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetIncreasedLightningDamageAttribute())
+	{		
+		SetIncreasedLightningDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetIncreasedLightningDamage()), 0.0f, GetIncreasedLightningDamage()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetIncreasedColdDamageAttribute())
+	{		
+		SetIncreasedColdDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetIncreasedColdDamage()), 0.0f, GetIncreasedColdDamage()));
 	}	
+	else if (Data.EvaluatedData.Attribute == GetIncreasedAttackDamageAttribute())
+	{		
+		SetIncreasedAttackDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetIncreasedAttackDamage()), 0.0f, GetIncreasedAttackDamage()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetIncreasedProjectileDamageAttribute())
+	{		
+		SetIncreasedProjectileDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetIncreasedProjectileDamage()), 0.0f, GetIncreasedProjectileDamage()));
+	}	
+	else if (Data.EvaluatedData.Attribute == GetMoreDamageAttribute())
+	{
+		SetMoreDamage(FMath::Clamp<int32>(FMath::RoundToInt(GetMoreDamage()), 0.0f, GetMoreDamage()));
+	}
 }

@@ -14,9 +14,13 @@ public:
 
 	// Contains every additive damage modifier
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<const UDataTable> AdditiveDamageModifierDataTable;
+	TObjectPtr<const UDataTable> FlatDamageModifierTable;
+	
+	// Contains every additive damage modifier
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<const UDataTable> AdditiveDamageModifierTable;
 
 	// Contains every multiplicative damage modifier
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<const UDataTable> MultiplicativeDamageModifierDataTable;	
+	TObjectPtr<const UDataTable> MultiplicativeDamageModifierTable;	
 };

@@ -1,4 +1,4 @@
-#include "ComCharacter.h"
+#include "ComPlayerCharacter.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -15,7 +15,7 @@
 #include "CombatActionRPG/GAS/ComCombatAttributeSet.h"
 #include "CombatActionRPG/GAS/ComDamageModifierAttributeSet.h"
 
-AComCharacter::AComCharacter()
+AComPlayerCharacter::AComPlayerCharacter()
 {	
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
@@ -54,13 +54,13 @@ AComCharacter::AComCharacter()
 	AbilitySystemComp->AddAttributeSetSubobject<UComDamageModifierAttributeSet>(DamageAttributeSet);
 }
 
-void AComCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AComPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	if (PlayerData == nullptr)
 	{
-		UE_LOG(ComLog, Error, TEXT("AComCharacter: Player data asset has not been set"));
+		UE_LOG(ComLog, Error, TEXT("AComPlayerCharacter: Player data asset has not been set"));
 		return;
 	}
 	
@@ -78,20 +78,20 @@ void AComCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if (UEnhancedInputComponent* EnhancedInputComponent { Cast<UEnhancedInputComponent>(InputComponent) })
 	{
 		// Bind movement input
-		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Started, this, &AComCharacter::OnInputStarted);
-		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Triggered, this, &AComCharacter::OnSetDestinationTriggered);
-		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Completed, this, &AComCharacter::OnSetDestinationReleased);
-		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Canceled, this, &AComCharacter::OnSetDestinationReleased);
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Started, this, &AComPlayerCharacter::OnInputStarted);
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Triggered, this, &AComPlayerCharacter::OnSetDestinationTriggered);
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Completed, this, &AComPlayerCharacter::OnSetDestinationReleased);
+		EnhancedInputComponent->BindAction(PlayerData->Move, ETriggerEvent::Canceled, this, &AComPlayerCharacter::OnSetDestinationReleased);
 
 		// Bind Abilities input
 		for (FComAbilityInput AbilityInput : PlayerData->InitialAbilities)
 		{
-			EnhancedInputComponent->BindAction(AbilityInput.InputAction, ETriggerEvent::Started, this, &AComCharacter::OnActivateAbilityStarted, AbilityInput.Ability);
+			EnhancedInputComponent->BindAction(AbilityInput.InputAction, ETriggerEvent::Started, this, &AComPlayerCharacter::OnActivateAbilityStarted, AbilityInput.Ability);
 		}		
 	}
 }
 
-void AComCharacter::PossessedBy(AController* NewController)
+void AComPlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
@@ -104,23 +104,23 @@ void AComCharacter::PossessedBy(AController* NewController)
 	}
 }
 
-UAbilitySystemComponent* AComCharacter::GetAbilitySystemComponent() const
+UAbilitySystemComponent* AComPlayerCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComp;
 }
 
-void AComCharacter::OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability)
+void AComPlayerCharacter::OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability)
 {
 	AbilitySystemComp->TryActivateAbilityByClass(Ability);
 }
 
-void AComCharacter::OnInputStarted()
+void AComPlayerCharacter::OnInputStarted()
 {
 	GetController()->StopMovement();	
 }
 
 // Move toward destination while input is triggered
-void AComCharacter::OnSetDestinationTriggered()
+void AComPlayerCharacter::OnSetDestinationTriggered()
 {
 	SetDestinationTriggerDuration += GetWorld()->GetDeltaSeconds();
 
@@ -138,7 +138,7 @@ void AComCharacter::OnSetDestinationTriggered()
 }
 
 // Move to destination if this was a short click
-void AComCharacter::OnSetDestinationReleased()
+void AComPlayerCharacter::OnSetDestinationReleased()
 {
 	// If this is a short click
 	if (SetDestinationTriggerDuration <= ClickToDestinationThreshold)

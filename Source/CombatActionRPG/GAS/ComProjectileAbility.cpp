@@ -3,7 +3,7 @@
 #include "AssetTypeCategories.h"
 #include "ComBaseProjectile.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "CombatActionRPG/Character/ComCharacter.h"
+#include "CombatActionRPG/Character/ComPlayerCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Tasks/GameplayTask_WaitDelay.h"
@@ -18,7 +18,7 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		return;
 	}
 
-	AComCharacter* Character { CastChecked<AComCharacter>(GetAvatarActorFromActorInfo()) };
+	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
 
 	// Spawn a projectile in the direction of the cursor click
 	if (APlayerController* PlayerController { Cast<APlayerController>(Character->GetController()) } )
@@ -44,7 +44,7 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 
 void UComProjectileAbility::SpawnProjectile()
 {
-	AComCharacter* Character { CastChecked<AComCharacter>(GetAvatarActorFromActorInfo()) };
+	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
 
 	// Wait until character finish rotating
 	if (Character->ReachedDesiredRotation() == false)

@@ -43,12 +43,29 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find gameplay ability instigator"));
 		return 0.0f;
 	}
+	// Flat damage added to the base damage 
+	float FlatDamageModifier { 0 };
 
+	TArray<FComDamageModifierRow*> FlatDamageModifierRows;
+	FlatDamageModifierTable->GetAllRows<FComDamageModifierRow>(FString(""), FlatDamageModifierRows);
+	
+	for (FComDamageModifierRow* FlatDamageModifierRow : FlatDamageModifierRows)
+	{
+		FGameplayTag RequiredTag = FlatDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
+		
+		// If there is no required tag or the instigator ability has the required tag 
+		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->AbilityTags.HasTag(RequiredTag)))
+		{
+			// Add the flat damage attribute from the instigator attribute set
+			FlatDamageModifier += FlatDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet);
+		}
+	}
+	
 	// Damage percent added additively to the total damage 
 	float AdditiveDamageModifier { 1 };
 
 	TArray<FComDamageModifierRow*> AdditiveDamageModifierRows;
-	AdditiveDamageModifierDataTable->GetAllRows<FComDamageModifierRow>(FString(""), AdditiveDamageModifierRows);
+	AdditiveDamageModifierTable->GetAllRows<FComDamageModifierRow>(FString(""), AdditiveDamageModifierRows);
 	
 	for (FComDamageModifierRow* AdditiveDamageModifierRow : AdditiveDamageModifierRows)
 	{
@@ -63,7 +80,7 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 	}
 
 	TArray<FComDamageModifierRow*> MultiplicativeDamageModifierRows;
-	MultiplicativeDamageModifierDataTable->GetAllRows<FComDamageModifierRow>(FString(""), MultiplicativeDamageModifierRows);
+	MultiplicativeDamageModifierTable->GetAllRows<FComDamageModifierRow>(FString(""), MultiplicativeDamageModifierRows);
 	
 	// Damage percent added multiplicatively to the total damage
 	float MultiplicativeDamageModifier { 1 };
@@ -81,7 +98,7 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 		}
 	}
 	
-	float Damage = { CombatSet->GetBaseDamage() * AdditiveDamageModifier * MultiplicativeDamageModifier };
+	float Damage = { (CombatSet->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
 	
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("UComProjectileMagnitude - Damage: %f"), Damage));
 	

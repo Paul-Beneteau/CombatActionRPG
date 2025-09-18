@@ -74,19 +74,35 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{		
-		SetMana(FMath::Clamp(GetMana(), 0.0f, GetMaxMana()));
+		SetMana(FMath::Clamp<int32>(FMath::RoundToInt(GetMana()), 0.0f, GetMaxMana()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetBaseDamageAttribute())
+	{		
+		SetBaseDamage(GetBaseDamage());
 	}
 	
-	if (GetHealth() != HealthBeforeChange)
+	/*if (GetHealth() != HealthBeforeChange)
 	{
 		OnHealthChanged.Broadcast(Instigator, HealthBeforeChange, GetHealth());
 	}
 	else if (GetMana() != ManaBeforeChange)
 	{
 		OnManaChanged.Broadcast(Instigator, ManaBeforeChange, GetMana());
+	}*/
+
+}
+
+// Sending event via 
+void UComCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	
+	if (Attribute == GetHealthAttribute() && OldValue != NewValue)
+	{
+		OnHealthChanged.Broadcast(nullptr, OldValue, NewValue);
 	}
-	else if (Data.EvaluatedData.Attribute == GetBaseDamageAttribute())
-	{		
-		SetBaseDamage(GetBaseDamage());
+	else if (Attribute == GetManaAttribute() && OldValue != NewValue)
+	{
+		OnManaChanged.Broadcast(nullptr, OldValue, NewValue);
 	}
 }

@@ -17,12 +17,16 @@ class COMBATACTIONRPG_API UComDamageModifierAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 	
 public:
+	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, AddedPhysicalDamage)
+	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, AddedFireDamage)
+	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, AddedLightningDamage)
+	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, AddedColdDamage)	
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedDamage)
-	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedProjectileDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedFireDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedLightningDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedColdDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedAttackDamage)
+	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedProjectileDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, MoreDamage)
 	
 	UComDamageModifierAttributeSet();
@@ -31,24 +35,31 @@ public:
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	
 protected:
+	// Flat Damage
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData AddedPhysicalDamage;
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData AddedFireDamage;	
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData AddedLightningDamage;
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData AddedColdDamage;
+	
 	// Additive damage
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData IncreasedDamage;
-	
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	FGameplayAttributeData IncreasedProjectileDamage;
-	
+	FGameplayAttributeData IncreasedPhysicalDamage;	
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	FGameplayAttributeData IncreasedFireDamage;
-	
+	FGameplayAttributeData IncreasedFireDamage;	
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	FGameplayAttributeData IncreasedLightningDamage;
-	
+	FGameplayAttributeData IncreasedLightningDamage;	
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData IncreasedColdDamage;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData IncreasedAttackDamage;
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData IncreasedProjectileDamage;
 	
 	// Multiplicative damage
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")

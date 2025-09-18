@@ -3,9 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
-#include "AttributeSet.h"
 #include "ComPlayerDataAsset.h"
-#include "ComCharacter.generated.h"
+#include "ComPlayerCharacter.generated.h"
 
 class UComAbilitySystemComponent;
 class UComDamageModifierAttributeSet;
@@ -16,12 +15,12 @@ class UInputAction;
 class UInputMappingContext;
 
 UCLASS()
-class COMBATACTIONRPG_API AComCharacter : public ACharacter, public IAbilitySystemInterface
+class COMBATACTIONRPG_API AComPlayerCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:	
-	AComCharacter();
+	AComPlayerCharacter();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
