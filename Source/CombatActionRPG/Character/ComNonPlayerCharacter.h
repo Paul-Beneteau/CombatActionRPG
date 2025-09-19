@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "ComNonPlayerCharacter.generated.h"
 
+class UGameplayEffect;
 class UComAbilitySystemComponent;
 class UComCombatAttributeSet;
 
@@ -16,7 +17,7 @@ class COMBATACTIONRPG_API AComNonPlayerCharacter : public ACharacter, public IAb
 public:
 	AComNonPlayerCharacter();
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginPlay() override;
 
 	// Implements IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
@@ -26,4 +27,6 @@ protected:
 	UComAbilitySystemComponent* AbilitySystemComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
+	UPROPERTY(EditDefaultsOnly, Category="GAS")
+	TSubclassOf<UGameplayEffect> InitialGameplayEffect;
 };

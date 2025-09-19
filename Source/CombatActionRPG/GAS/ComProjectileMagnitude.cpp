@@ -38,7 +38,7 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 
 	const UGameplayAbility* InstigatorAbility { Spec.GetEffectContext().GetAbility() };
 	
-	if (DamageModifierSet == nullptr)
+	if (InstigatorAbility == nullptr)
 	{
 		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find gameplay ability instigator"));
 		return 0.0f;
@@ -100,7 +100,6 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 	
 	float Damage = { (CombatSet->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
 	
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("UComProjectileMagnitude - Damage: %f"), Damage));
-	
-	return Damage;
+	// Remove decimals
+	return FMath::RoundToInt32(Damage);
 }

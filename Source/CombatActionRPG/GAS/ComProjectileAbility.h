@@ -13,6 +13,14 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+	// Make ability tags visible for blueprint
+	UFUNCTION(BlueprintCallable, Category="Tag")
+	const FGameplayTagContainer& GetAssetTagsBP() const;
+
+	// Get the ability damage (the gameplay effect modifier magnitude)
+	UFUNCTION(BlueprintCallable, Category="Damage")
+	float GetDamage() const;
+	
 protected:
 	// Projectile spawned
 	UPROPERTY(EditAnywhere, Category = "Projectile")

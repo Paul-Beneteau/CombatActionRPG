@@ -29,8 +29,6 @@ public:
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedProjectileDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, MoreDamage)
 	
-	UComDamageModifierAttributeSet();
-
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	

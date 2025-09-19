@@ -1,16 +1,6 @@
 #include "ComCombatAttributeSet.h"
 #include "GameplayEffectExtension.h"
 
-// TODO: Move initial values in data asset or initial gameplay effect
-UComCombatAttributeSet::UComCombatAttributeSet() :
-	MaxHealth(200),
-	MaxMana(100),
-	BaseDamage(20)
-{
-	InitHealth(GetMaxHealth());
-	InitMana(GetMaxMana());
-}
-
 void UComCombatAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
@@ -80,19 +70,8 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	{		
 		SetBaseDamage(GetBaseDamage());
 	}
-	
-	/*if (GetHealth() != HealthBeforeChange)
-	{
-		OnHealthChanged.Broadcast(Instigator, HealthBeforeChange, GetHealth());
-	}
-	else if (GetMana() != ManaBeforeChange)
-	{
-		OnManaChanged.Broadcast(Instigator, ManaBeforeChange, GetMana());
-	}*/
-
 }
 
-// Sending event via 
 void UComCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);

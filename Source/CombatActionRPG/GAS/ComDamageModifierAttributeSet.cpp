@@ -2,10 +2,6 @@
 
 #include "GameplayEffectExtension.h"
 
-UComDamageModifierAttributeSet::UComDamageModifierAttributeSet()
-{
-}
-
 void UComDamageModifierAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);

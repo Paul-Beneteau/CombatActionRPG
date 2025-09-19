@@ -55,6 +55,7 @@ void AComBaseProjectile::BeginPlay()
 	SetLifeSpan(3.0f);
 }
 
+// Apply the gameplay effect to the actor hit
 void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

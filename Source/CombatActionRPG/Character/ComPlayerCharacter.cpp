@@ -54,6 +54,7 @@ AComPlayerCharacter::AComPlayerCharacter()
 	AbilitySystemComp->AddAttributeSetSubobject<UComDamageModifierAttributeSet>(DamageAttributeSet);
 }
 
+// Binds Input actions from PlayerData DataSet with their corresponding callbacks
 void AComPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -109,6 +110,9 @@ void AComPlayerCharacter::PossessedBy(AController* NewController)
 	{
 		AbilitySystemComp->GiveAbility(FGameplayAbilitySpec(AbilityInput.Ability));
 	}
+
+	check(InitialGameplayEffect);
+	AbilitySystemComp->ApplyGameplayEffectToSelf(InitialGameplayEffect->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComp->MakeEffectContext());
 }
 
 UAbilitySystemComponent* AComPlayerCharacter::GetAbilitySystemComponent() const
@@ -121,6 +125,7 @@ void AComPlayerCharacter::OnActivateAbilityStarted(const TSubclassOf<UGameplayAb
 	AbilitySystemComp->TryActivateAbilityByClass(Ability);
 }
 
+// Remove the current ability bound to the input action and binds the new ability
 void AComPlayerCharacter::SetInputActionAbility(UInputAction* InputAction, TSubclassOf<UGameplayAbility> Ability)
 {
 	check(InputAction && Ability);
@@ -131,15 +136,13 @@ void AComPlayerCharacter::SetInputActionAbility(UInputAction* InputAction, TSubc
 		EnhancedInputComponent->RemoveBindingByHandle(*InputHandleMap.Find(InputAction));
 		
 		InputHandleMap.Remove(InputAction);
+		InputAbilityMap.Remove(InputAction);
 		
-		// Add new binding and save the handle
+		// Add new binding and save the handle and ability
 		uint32 NewHandle { EnhancedInputComponent->BindAction(InputAction, ETriggerEvent::Started,
 	this, &AComPlayerCharacter::OnActivateAbilityStarted, Ability).GetHandle() };
 
-		InputHandleMap.Remove(InputAction);
 		InputHandleMap.Add(InputAction, NewHandle);
-
-		InputAbilityMap.Remove(InputAction);
 		InputAbilityMap.Add(InputAction, Ability);
 	}
 }

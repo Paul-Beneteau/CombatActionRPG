@@ -1,11 +1,15 @@
 #include "ComProjectileAbility.h"
 
+#include "AbilitySystemComponent.h"
 #include "AssetTypeCategories.h"
 #include "ComBaseProjectile.h"
+#include "ComCombatAttributeSet.h"
+#include "ComProjectileMagnitude.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "CombatActionRPG/Character/ComPlayerCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Systems/MovieSceneBaseValueEvaluatorSystem.h"
 #include "Tasks/GameplayTask_WaitDelay.h"
 
 void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -42,6 +46,37 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	}
 }
 
+const FGameplayTagContainer& UComProjectileAbility::GetAssetTagsBP() const
+{	
+	return GetAssetTags();	
+}
+
+float UComProjectileAbility::GetDamage() const
+{
+	float Damage { 0.0f };
+	UGameplayEffect* GameplayEffect { ProjectileGameplayEffect->GetDefaultObject<UGameplayEffect>() };
+
+	// For every modifier
+	for (const FGameplayModifierInfo& Mod : GameplayEffect->Modifiers)
+	{
+		// If the modifier is applied to the damage attribute
+		if (Mod.Attribute == UComCombatAttributeSet::GetDamageAttribute())
+		{
+			FGameplayEffectContextHandle EffectHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+			EffectHandle.SetAbility(this);	
+			FGameplayEffectSpec EffectSpec(GameplayEffect, EffectHandle, 1.f);
+
+			// Get modifier magnitude which is the ability damage
+			if (UComProjectileMagnitude* ProjectileMagnitude = Mod.ModifierMagnitude.GetCustomMagnitudeCalculationClass()->GetDefaultObject<UComProjectileMagnitude>())
+			{
+				Damage = ProjectileMagnitude->CalculateBaseMagnitude_Implementation(EffectSpec);
+			}
+		}
+	}
+
+	return Damage;
+}
+
 void UComProjectileAbility::SpawnProjectile()
 {
 	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
@@ -64,8 +99,6 @@ void UComProjectileAbility::SpawnProjectile()
 	FActorSpawnParameters SpawnParams = FActorSpawnParameters();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = Character;
-
-	//GetAssetTags()
 
 	AComBaseProjectile* Projectile { GetWorld()->SpawnActor<AComBaseProjectile>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams) };
 	Projectile->HitActorGameplayEffect = ProjectileGameplayEffect;

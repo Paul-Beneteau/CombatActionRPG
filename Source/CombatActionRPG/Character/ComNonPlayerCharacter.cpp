@@ -13,11 +13,14 @@ AComNonPlayerCharacter::AComNonPlayerCharacter()
 	AbilitySystemComp->AddAttributeSetSubobject<UComCombatAttributeSet>(CombatAttributeSet);
 }
 
-void AComNonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AComNonPlayerCharacter::BeginPlay()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::BeginPlay();
 
 	AbilitySystemComp->InitAbilityActorInfo(this, this);
+
+	check(InitialGameplayEffect);
+	AbilitySystemComp->ApplyGameplayEffectToSelf(InitialGameplayEffect->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComp->MakeEffectContext());
 }
 
 UAbilitySystemComponent* AComNonPlayerCharacter::GetAbilitySystemComponent() const

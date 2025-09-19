@@ -6,6 +6,7 @@
 #include "ComPlayerDataAsset.h"
 #include "ComPlayerCharacter.generated.h"
 
+class UGameplayEffect;
 class UComProjectileAbility;
 struct FEnhancedInputActionEventBinding;
 class UComAbilitySystemComponent;
@@ -34,7 +35,7 @@ public:
 	UFUNCTION()
 	void OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability);
 
-	// Gives a new ability to an input action
+	// Remove the current ability bound to the input action and binds the new ability
 	UFUNCTION(BlueprintCallable)
 	void SetInputActionAbility(UInputAction* InputAction, TSubclassOf<UGameplayAbility> Ability);
 	
@@ -49,12 +50,15 @@ protected:
 	float ClickToDestinationThreshold { 0.3f };	
 	float SetDestinationTriggerDuration { 0.0f };
 
+	// GAS Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	UComAbilitySystemComponent* AbilitySystemComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComDamageModifierAttributeSet> DamageAttributeSet;
+	UPROPERTY(EditDefaultsOnly, Category="GAS")
+	TSubclassOf<UGameplayEffect> InitialGameplayEffect;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Data")
 	TObjectPtr<UComPlayerDataAsset> PlayerData;
