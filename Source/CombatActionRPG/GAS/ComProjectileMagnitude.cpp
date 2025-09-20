@@ -54,7 +54,7 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 		FGameplayTag RequiredTag = FlatDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
 		
 		// If there is no required tag or the instigator ability has the required tag 
-		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->AbilityTags.HasTag(RequiredTag)))
+		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->GetAssetTags().HasTag(RequiredTag)))
 		{
 			// Add the flat damage attribute from the instigator attribute set
 			FlatDamageModifier += FlatDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet);

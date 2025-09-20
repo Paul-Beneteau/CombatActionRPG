@@ -28,8 +28,7 @@ class COMBATACTIONRPG_API UComPlayerDataAsset : public UDataAsset
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category="GAS")
-	TArray<FComAbilityInput> InitialAbilities;
-	//TArray<TSubclassOf<UGameplayAbility>> InitialAbilities;	
+	TArray<FComAbilityInput> InitialAbilities;	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> DefaultInputContext;

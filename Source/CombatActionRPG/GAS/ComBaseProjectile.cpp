@@ -1,15 +1,12 @@
 #include "ComBaseProjectile.h"
 
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
 #include "CombatActionRPG/CombatActionRPG.h"
-#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "AbilitySystemInterface.h"
 #include "CombatActionRPG/Character/ComPlayerCharacter.h"
 #include "CombatActionRPG/Character/ComNonPlayerCharacter.h"
 
@@ -52,7 +49,7 @@ void AComBaseProjectile::BeginPlay()
 		UE_LOG(ComLog, Warning, TEXT("AComBaseProjectile: HitWorldEffect has not been set"));
 	}
 
-	SetLifeSpan(3.0f);
+	SetLifeSpan(LifeSpawn);
 }
 
 // Apply the gameplay effect to the actor hit

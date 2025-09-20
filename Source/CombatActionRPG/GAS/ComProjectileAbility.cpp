@@ -1,16 +1,17 @@
 #include "ComProjectileAbility.h"
 
 #include "AbilitySystemComponent.h"
-#include "AssetTypeCategories.h"
 #include "ComBaseProjectile.h"
 #include "ComCombatAttributeSet.h"
 #include "ComProjectileMagnitude.h"
-#include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "CombatActionRPG/Character/ComPlayerCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Systems/MovieSceneBaseValueEvaluatorSystem.h"
-#include "Tasks/GameplayTask_WaitDelay.h"
+
+UComProjectileAbility::UComProjectileAbility()
+{
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+}
 
 void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                             const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -62,6 +63,13 @@ float UComProjectileAbility::GetDamage() const
 		// If the modifier is applied to the damage attribute
 		if (Mod.Attribute == UComCombatAttributeSet::GetDamageAttribute())
 		{
+			UAbilitySystemComponent*  ASC = GetAbilitySystemComponentFromActorInfo();
+
+			if (ASC == nullptr)
+			{
+				return 0;
+			}
+			
 			FGameplayEffectContextHandle EffectHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
 			EffectHandle.SetAbility(this);	
 			FGameplayEffectSpec EffectSpec(GameplayEffect, EffectHandle, 1.f);

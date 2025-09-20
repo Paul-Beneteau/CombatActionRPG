@@ -42,6 +42,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UParticleSystemComponent> EffectComp;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float LifeSpawn { 3.0 };
+	
 	// Effect when projectile is spawned
 	UPROPERTY(EditDefaultsOnly, Category = "Particle")
 	TObjectPtr<UParticleSystem> HitWorldParticleEffect;
