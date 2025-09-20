@@ -113,6 +113,8 @@ void AComPlayerCharacter::PossessedBy(AController* NewController)
 
 	check(InitialGameplayEffect);
 	AbilitySystemComp->ApplyGameplayEffectToSelf(InitialGameplayEffect->GetDefaultObject<UGameplayEffect>(), 1.0f, AbilitySystemComp->MakeEffectContext());
+
+	CombatAttributeSet->InitPeriodicAttributes();
 }
 
 UAbilitySystemComponent* AComPlayerCharacter::GetAbilitySystemComponent() const

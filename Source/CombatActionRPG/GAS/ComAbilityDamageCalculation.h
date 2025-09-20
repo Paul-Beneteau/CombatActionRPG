@@ -2,10 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameplayModMagnitudeCalculation.h"
-#include "ComProjectileMagnitude.generated.h"
+#include "ComAbilityDamageCalculation.generated.h"
 
+// Compute the damage of an ability
 UCLASS()
-class COMBATACTIONRPG_API UComProjectileMagnitude : public UGameplayModMagnitudeCalculation
+class COMBATACTIONRPG_API UComAbilityDamageCalculation : public UGameplayModMagnitudeCalculation
 {
 	GENERATED_BODY()
 	

@@ -1,4 +1,4 @@
-#include "ComProjectileMagnitude.h"
+#include "ComAbilityDamageCalculation.h"
 
 #include "AbilitySystemInterface.h"
 #include "ComCombatAttributeSet.h"
@@ -6,41 +6,41 @@
 #include "CombatActionRPG/CombatActionRPG.h"
 #include "CombatActionRPG/ComDataTableRow.h"
 
-float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
+float UComAbilityDamageCalculation::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
 {
 	IAbilitySystemInterface* Instigator = Cast<IAbilitySystemInterface>(Spec.GetEffectContext().GetInstigator());
 	if (Instigator == nullptr)
 	{
-		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find gameplay effect instigator"));
+		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find gameplay effect instigator"));
 		return 0.0f;
 	}
 	
 	UAbilitySystemComponent* AbilitySystemComp = Instigator->GetAbilitySystemComponent();
 	if (AbilitySystemComp == nullptr)
 	{
-		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find ability system component of instigator"));
+		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find ability system component of instigator"));
 		return 0.0f;
 	}
 	
 	const UComDamageModifierAttributeSet* DamageModifierSet = Cast<UComDamageModifierAttributeSet>(AbilitySystemComp->GetAttributeSet(UComDamageModifierAttributeSet::StaticClass()));
 	if (DamageModifierSet == nullptr)
 	{
-		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find damage attribute set of instigator"));
+		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find damage attribute set of instigator"));
 		return 0.0f;
 	}	
 
-	const UComCombatAttributeSet* CombatSet = Cast<UComCombatAttributeSet>(AbilitySystemComp->GetAttributeSet(UComCombatAttributeSet::StaticClass()));
-	if (CombatSet == nullptr)
+	const UComCombatAttributeSet* CombatAttributeSet = Cast<UComCombatAttributeSet>(AbilitySystemComp->GetAttributeSet(UComCombatAttributeSet::StaticClass()));
+	if (CombatAttributeSet == nullptr)
 	{
-		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find combat attribute set of instigator"));
+		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find combat attribute set of instigator"));
 		return 0.0f;
 	}
 
-	const UGameplayAbility* InstigatorAbility { Spec.GetEffectContext().GetAbility() };
+	const UGameplayAbility* Ability { Spec.GetEffectContext().GetAbility() };
 	
-	if (InstigatorAbility == nullptr)
+	if (Ability == nullptr)
 	{
-		UE_LOG(ComLog, Error, TEXT("UComProjectileMagnitude: Can't find gameplay ability instigator"));
+		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find gameplay ability instigator"));
 		return 0.0f;
 	}
 	// Flat damage added to the base damage 
@@ -54,7 +54,7 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 		FGameplayTag RequiredTag = FlatDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
 		
 		// If there is no required tag or the instigator ability has the required tag 
-		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->GetAssetTags().HasTag(RequiredTag)))
+		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->GetAssetTags().HasTag(RequiredTag)))
 		{
 			// Add the flat damage attribute from the instigator attribute set
 			FlatDamageModifier += FlatDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet);
@@ -72,7 +72,7 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 		FGameplayTag RequiredTag = AdditiveDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
 		
 		// If there is no required tag or the instigator ability has the required tag 
-		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->AbilityTags.HasTag(RequiredTag)))
+		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->AbilityTags.HasTag(RequiredTag)))
 		{
 			// Add the additive damage attribute from the instigator attribute set
 			AdditiveDamageModifier += AdditiveDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100;
@@ -91,14 +91,14 @@ float UComProjectileMagnitude::CalculateBaseMagnitude_Implementation(const FGame
 		FGameplayTag RequiredTag = MultiplicativeDamageRow->RequiredTag.Get(FGameplayTag::EmptyTag);
 
 		// If there is no required tag or the instigator ability has the required tag 
-		if (RequiredTag == FGameplayTag::EmptyTag || (InstigatorAbility->AbilityTags.HasTag(RequiredTag)))			
+		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->AbilityTags.HasTag(RequiredTag)))			
 		{
 			// Add the multiplicative damage attribute from the instigator attribute set
 			MultiplicativeDamageModifier *= (1 + (MultiplicativeDamageRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100));
 		}
 	}
 	
-	float Damage = { (CombatSet->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
+	float Damage = { (CombatAttributeSet->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
 	
 	// Remove decimals
 	return FMath::RoundToInt32(Damage);

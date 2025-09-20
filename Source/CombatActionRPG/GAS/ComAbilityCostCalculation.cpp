@@ -1,9 +1,9 @@
-#include "ComCostMagnitude.h"
+#include "ComAbilityCostCalculation.h"
 
 #include "ComProjectileAbility.h"
 #include "CombatActionRPG/CombatActionRPG.h"
 
-float UComCostMagnitude::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
+float UComAbilityCostCalculation::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
 {
 	const UComProjectileAbility* ProjectileAbility { Cast<UComProjectileAbility>(Spec.GetEffectContext().GetAbility()) };
 	

@@ -2,11 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameplayModMagnitudeCalculation.h"
-#include "ComCostMagnitude.generated.h"
+#include "ComAbilityCostCalculation.generated.h"
 
-// Compute the 
+// Compute the attribute cost of an ability
 UCLASS()
-class COMBATACTIONRPG_API UComCostMagnitude : public UGameplayModMagnitudeCalculation
+class COMBATACTIONRPG_API UComAbilityCostCalculation : public UGameplayModMagnitudeCalculation
 {
 	GENERATED_BODY()
 	

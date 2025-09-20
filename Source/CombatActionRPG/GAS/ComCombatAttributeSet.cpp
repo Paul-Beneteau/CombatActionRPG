@@ -1,6 +1,12 @@
 #include "ComCombatAttributeSet.h"
 #include "GameplayEffectExtension.h"
 
+UComCombatAttributeSet::UComCombatAttributeSet()
+{
+	OnHealthRegenChanged.AddDynamic(this, &UComCombatAttributeSet::UpdateActiveEffect);
+	OnManaRegenChanged.AddDynamic(this, &UComCombatAttributeSet::UpdateActiveEffect);
+}
+
 void UComCombatAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
@@ -10,20 +16,19 @@ void UComCombatAttributeSet::PreAttributeChange(const FGameplayAttribute& Attrib
 		// Health value must be between 0 and MaxHealth
 		NewValue = FMath::Clamp<float>(NewValue, 0.0f, GetMaxHealth());
 	}
-	else if (Attribute == GetMaxHealthAttribute())
-	{
-		// MaxHealth value can't be below 1.
-		NewValue = FMath::Max(NewValue, 1.0f);
-	}
 	if (Attribute == GetManaAttribute())
 	{
 		// Mana value must be between 0 and MaxMana
 		NewValue = FMath::Clamp<float>(NewValue, 0.0f, GetMaxMana());
 	}
-	else if (Attribute == GetMaxManaAttribute())
+	else if (Attribute == GetMaxHealthAttribute() || Attribute == GetMaxManaAttribute())
 	{
 		// MaxMana value can't be below 1.
 		NewValue = FMath::Max(NewValue, 1.0f);
+	}
+	else if (Attribute == GetHealthRegenAttribute() || Attribute == GetManaRegenAttribute())
+	{
+		NewValue = FMath::Clamp<float>(NewValue, 0.0f, NewValue);
 	}
 }
 
@@ -70,6 +75,14 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	{		
 		SetBaseDamage(GetBaseDamage());
 	}
+	else if (Data.EvaluatedData.Attribute == GetHealthRegenAttribute())
+	{		
+		SetHealthRegen(GetHealthRegen());
+	}
+	else if (Data.EvaluatedData.Attribute == GetManaRegenAttribute())
+	{		
+		SetManaRegen(GetManaRegen());
+	}
 }
 
 void UComCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
@@ -84,4 +97,50 @@ void UComCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attri
 	{
 		OnManaChanged.Broadcast(nullptr, OldValue, NewValue);
 	}
+	else if (Attribute == GetHealthRegenAttribute())
+	{
+		OnHealthRegenChanged.Broadcast(GetHealthAttribute(), GetHealthRegen(), FName("HealthRegenEffect"));
+	}
+	else if (Attribute == GetManaRegenAttribute())
+	{
+		OnManaRegenChanged.Broadcast(GetManaAttribute(), GetManaRegen(), FName("ManaRegenEffect"));
+	}
+}
+
+// Apply health/mana regen active effect
+void UComCombatAttributeSet::InitPeriodicAttributes()
+{
+	UpdateActiveEffect(GetHealthAttribute(), GetHealthRegen(), FName("HealthRegenEffect"));
+	UpdateActiveEffect(GetManaAttribute(), GetManaRegen(), FName("ManaRegenEffect"));
+}
+
+// create a periodic gameplay effect spec and apply it to owning ability system component
+void UComCombatAttributeSet::UpdateActiveEffect(FGameplayAttribute TargetAttribute, float EffectMagnitude, FName EffectName)
+{
+	// If there is already an active effect, remove it
+	if (FActiveGameplayEffectHandle* EffectHandle = ActivePeriodicEffectMap.Find(TargetAttribute))
+	{
+		GetOwningAbilitySystemComponent()->RemoveActiveGameplayEffect(*EffectHandle);
+	}
+	
+	UGameplayEffect* PeriodicEffect = NewObject<UGameplayEffect>(GetTransientPackage(), EffectName);
+
+	// Set effect duration and period
+	PeriodicEffect->DurationPolicy = EGameplayEffectDurationType::Infinite;
+	PeriodicEffect->Period = AttributePeriod;	
+
+	// Attribute modifier
+	FGameplayModifierInfo Modifier;
+	Modifier.Attribute = TargetAttribute;
+	Modifier.ModifierOp = EGameplayModOp::Additive;
+	// Multiply magnitude by period so the magnitude value correspond to a period of 1 second
+	Modifier.ModifierMagnitude = FScalableFloat(EffectMagnitude * AttributePeriod);
+	PeriodicEffect->Modifiers.Add(Modifier);
+
+	FGameplayEffectSpec EffectSpec = FGameplayEffectSpec(PeriodicEffect, GetOwningAbilitySystemComponent()->MakeEffectContext(), 1.f);
+
+	FActiveGameplayEffectHandle EffectHandle = GetOwningAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(EffectSpec);
+
+	// Save the active effect
+	ActivePeriodicEffectMap.Add(TargetAttribute, EffectHandle);
 }

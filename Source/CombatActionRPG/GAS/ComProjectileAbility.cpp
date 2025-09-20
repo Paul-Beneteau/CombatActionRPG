@@ -2,16 +2,9 @@
 
 #include "AbilitySystemComponent.h"
 #include "ComBaseProjectile.h"
-#include "ComCombatAttributeSet.h"
-#include "ComProjectileMagnitude.h"
 #include "CombatActionRPG/Character/ComPlayerCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
-UComProjectileAbility::UComProjectileAbility()
-{
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-}
 
 void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                             const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -47,44 +40,6 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	}
 }
 
-const FGameplayTagContainer& UComProjectileAbility::GetAssetTagsBP() const
-{	
-	return GetAssetTags();	
-}
-
-float UComProjectileAbility::GetDamage() const
-{
-	float Damage { 0.0f };
-	UGameplayEffect* GameplayEffect { ProjectileGameplayEffect->GetDefaultObject<UGameplayEffect>() };
-
-	// For every modifier
-	for (const FGameplayModifierInfo& Mod : GameplayEffect->Modifiers)
-	{
-		// If the modifier is applied to the damage attribute
-		if (Mod.Attribute == UComCombatAttributeSet::GetDamageAttribute())
-		{
-			UAbilitySystemComponent*  ASC = GetAbilitySystemComponentFromActorInfo();
-
-			if (ASC == nullptr)
-			{
-				return 0;
-			}
-			
-			FGameplayEffectContextHandle EffectHandle = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
-			EffectHandle.SetAbility(this);	
-			FGameplayEffectSpec EffectSpec(GameplayEffect, EffectHandle, 1.f);
-
-			// Get modifier magnitude which is the ability damage
-			if (UComProjectileMagnitude* ProjectileMagnitude = Mod.ModifierMagnitude.GetCustomMagnitudeCalculationClass()->GetDefaultObject<UComProjectileMagnitude>())
-			{
-				Damage = ProjectileMagnitude->CalculateBaseMagnitude_Implementation(EffectSpec);
-			}
-		}
-	}
-
-	return Damage;
-}
-
 void UComProjectileAbility::SpawnProjectile()
 {
 	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
@@ -109,7 +64,7 @@ void UComProjectileAbility::SpawnProjectile()
 	SpawnParams.Instigator = Character;
 
 	AComBaseProjectile* Projectile { GetWorld()->SpawnActor<AComBaseProjectile>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams) };
-	Projectile->HitActorGameplayEffect = ProjectileGameplayEffect;
+	Projectile->HitActorGameplayEffect = GameplayEffectClass;
 	Projectile->InstigatorAbility = this;
 	
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);

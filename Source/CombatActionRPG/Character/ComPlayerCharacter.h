@@ -53,7 +53,7 @@ protected:
 	// GAS Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	UComAbilitySystemComponent* AbilitySystemComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComDamageModifierAttributeSet> DamageAttributeSet;
