@@ -22,7 +22,17 @@ class COMBATACTIONRPG_API AComPlayerCharacter : public ACharacter, public IAbili
 {
 	GENERATED_BODY()
 
-public:	
+public:
+	// GAS Components
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
+	UComAbilitySystemComponent* AbilitySystemComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="GAS")
+	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
+	TObjectPtr<UComDamageModifierAttributeSet> DamageAttributeSet;
+	UPROPERTY(EditDefaultsOnly, Category="GAS")
+	TSubclassOf<UGameplayEffect> InitialGameplayEffect;
+	
 	AComPlayerCharacter();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -49,16 +59,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	float ClickToDestinationThreshold { 0.3f };	
 	float SetDestinationTriggerDuration { 0.0f };
-
-	// GAS Components
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
-	UComAbilitySystemComponent* AbilitySystemComp;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="GAS")
-	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
-	TObjectPtr<UComDamageModifierAttributeSet> DamageAttributeSet;
-	UPROPERTY(EditDefaultsOnly, Category="GAS")
-	TSubclassOf<UGameplayEffect> InitialGameplayEffect;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Data")
 	TObjectPtr<UComPlayerDataAsset> PlayerData;

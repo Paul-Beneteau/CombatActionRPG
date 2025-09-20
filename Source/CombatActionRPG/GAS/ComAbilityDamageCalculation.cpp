@@ -99,6 +99,8 @@ float UComAbilityDamageCalculation::CalculateBaseMagnitude_Implementation(const 
 	}
 	
 	float Damage = { (CombatAttributeSet->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
+
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("Damage: %f"), Damage));
 	
 	// Remove decimals
 	return FMath::RoundToInt32(Damage);

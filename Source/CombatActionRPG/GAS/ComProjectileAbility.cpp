@@ -2,6 +2,8 @@
 
 #include "AbilitySystemComponent.h"
 #include "ComBaseProjectile.h"
+#include "ComDamageModifierAttributeSet.h"
+#include "CombatActionRPG/CombatActionRPG.h"
 #include "CombatActionRPG/Character/ComPlayerCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -35,12 +37,13 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 			PlayerController->SetControlRotation(CharacterRotation);
 
 			// Spawn projectile. Loop to wait until character finish rotating
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UComProjectileAbility::SpawnProjectile, 0.1f, true);
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UComProjectileAbility::OnCharacterRotated, 0.1f, true);
 		}
 	}
 }
 
-void UComProjectileAbility::SpawnProjectile()
+// Wait for character to rotate before spawning projectiles
+void UComProjectileAbility::OnCharacterRotated()
 {
 	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
 
@@ -53,19 +56,76 @@ void UComProjectileAbility::SpawnProjectile()
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 	
 	// Reactivate bOrientRotationToMovement after character rotated
-	Character->GetCharacterMovement()->bOrientRotationToMovement = true;
-	
-	// Spawn Projectile
-	FVector ProjectileLocation = Character->GetMesh()->GetSocketLocation("BowEmitterSocket");		
-	FRotator ProjectileRotation = Character->GetActorRotation();
-	
-	FActorSpawnParameters SpawnParams = FActorSpawnParameters();
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = Character;
+	Character->GetCharacterMovement()->bOrientRotationToMovement = true;	
 
-	AComBaseProjectile* Projectile { GetWorld()->SpawnActor<AComBaseProjectile>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams) };
-	Projectile->HitActorGameplayEffect = GameplayEffectClass;
-	Projectile->InstigatorAbility = this;
+	// Add the AdditionalProjectile modifier that can increase number of projectile
+	SpawnProjectiles(1 + Character->DamageAttributeSet->GetAdditionalProjectile());
 	
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);
+}
+
+void UComProjectileAbility::SpawnProjectiles(int32 ProjectilesCount)
+{
+	
+	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
+	
+	TArray<FRotator> ProjectileRotations = GetProjectileRotations(ProjectilesCount);
+
+	for (FRotator ProjectileRotation : ProjectileRotations)
+	{		
+		FVector ProjectileLocation = Character->GetMesh()->GetSocketLocation("BowEmitterSocket");		
+	
+		FActorSpawnParameters SpawnParams = FActorSpawnParameters();
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = Character;
+				
+		if (AComBaseProjectile* Projectile { GetWorld()->SpawnActor<AComBaseProjectile>(ProjectileClass, ProjectileLocation, ProjectileRotation, SpawnParams) })
+		{
+			Projectile->HitActorGameplayEffect = GameplayEffectClass;
+			Projectile->InstigatorAbility = this;
+		}
+		else
+		{
+			UE_LOG(ComLog, Error, TEXT("UComProjectileAbility: Projectile didn't spawn"));
+			return;
+		}
+	}
+}
+
+TArray<FRotator> UComProjectileAbility::GetProjectileRotations(int32 ProjectilesCount)
+{
+	check (ProjectilesCount > 0);
+	
+	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
+	
+	TArray<FRotator> ProjectileRotations;
+
+	if (ProjectilesCount == 1)
+	{
+		ProjectileRotations.Add(Character->GetActorRotation());
+		return ProjectileRotations;
+	}
+
+	FRotator FirstProjectileRotation = Character->GetActorRotation();
+
+	// If there is less than 12 projectile, the spread is a predefined spread (15 degree). Else projectiles are spawn
+	// in a circle so the spread is 360 / ProjectilesCount.
+	float ProjectileSpread = ProjectilesCount < 12 ? ConeProjectileSpread : 360 / ProjectilesCount;
+	
+	if (ProjectilesCount < 12)
+	{		
+		// The total angle. each projectile is seperated by 15 degree
+		float TotalSpread { (ProjectilesCount - 1) * ProjectileSpread };
+
+		// The character rotation is at the middle of the spread. So we can subtract half of the spread to get the first
+		// projectile, or add it to get the last projectile
+		FirstProjectileRotation -= FRotator(0.0f, TotalSpread * 0.5, 0.0);
+	}
+	
+	for (int32 i = 0; i < ProjectilesCount; ++i)
+	{
+		ProjectileRotations.Add(FirstProjectileRotation + FRotator(0.0f, ProjectileSpread * i, 0.0f));
+	}
+	
+	return ProjectileRotations;
 }

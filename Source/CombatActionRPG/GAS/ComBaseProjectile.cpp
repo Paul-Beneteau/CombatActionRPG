@@ -91,5 +91,5 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		UE_LOG(ComLog, Error, TEXT("AComBaseProjectile: Can't find instigator or target"));
 	}	
 	
-	Destroy();
+	//Destroy();
 }

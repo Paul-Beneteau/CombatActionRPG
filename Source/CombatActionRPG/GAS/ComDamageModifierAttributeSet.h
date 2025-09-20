@@ -28,9 +28,9 @@ public:
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedAttackDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, IncreasedProjectileDamage)
 	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, MoreDamage)
+	ATTRIBUTE_ACCESSORS(UComDamageModifierAttributeSet, AdditionalProjectile)
 	
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
-	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	
 protected:
 	// Flat Damage
@@ -62,4 +62,10 @@ protected:
 	// Multiplicative damage
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData MoreDamage;
+
+	// Misc modifier
+
+	// Add a number of projectiles spawned par ability
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData AdditionalProjectile;
 };
