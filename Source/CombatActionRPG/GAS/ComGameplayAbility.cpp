@@ -2,6 +2,7 @@
 
 #include "ComAbilityDamageCalculation.h"
 #include "ComCombatAttributeSet.h"
+#include "CombatActionRPG/Character/ComPlayerCharacter.h"
 
 UComGameplayAbility::UComGameplayAbility()
 {

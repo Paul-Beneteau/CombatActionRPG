@@ -28,6 +28,7 @@ public:
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, MaxMana)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, HealthRegen)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, ManaRegen)
+	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, AttackSpeed)
 	
 	UPROPERTY(BlueprintAssignable, Category="Attribute")
 	mutable FOnAttributeChanged OnHealthChanged;
@@ -69,6 +70,9 @@ protected:
 	float HealthBeforeChange { 0.0f };	
 	float ManaBeforeChange { 0.0f };
 
+	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
+	FGameplayAttributeData AttackSpeed;
+	
 	// Meta attribute that handle damage applied to the health. TODO: Rename with a more explicit name
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
 	FGameplayAttributeData Damage;	

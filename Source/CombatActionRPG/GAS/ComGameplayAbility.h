@@ -21,7 +21,7 @@ public:
 	float GetFinalDamage() const;
 
 	int32 GetBaseDamage() const { return BaseDamage; }
-	
+
 	UFUNCTION(BlueprintCallable, Category="Ability")
 	int32 GetCost() const { return Cost; }
 
@@ -35,7 +35,7 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
 	int32 Cost;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
 	TObjectPtr<UTexture2D> Icon;
 };

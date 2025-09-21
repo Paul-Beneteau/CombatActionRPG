@@ -26,7 +26,7 @@ void UComCombatAttributeSet::PreAttributeChange(const FGameplayAttribute& Attrib
 		// MaxMana value can't be below 1.
 		NewValue = FMath::Max(NewValue, 1.0f);
 	}
-	else if (Attribute == GetHealthRegenAttribute() || Attribute == GetManaRegenAttribute())
+	else if (Attribute == GetHealthRegenAttribute() || Attribute == GetManaRegenAttribute() || Attribute == GetAttackSpeedAttribute())
 	{
 		NewValue = FMath::Clamp<float>(NewValue, 0.0f, NewValue);
 	}
@@ -71,6 +71,7 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	{		
 		SetMana(FMath::Clamp<int32>(FMath::RoundToInt(GetMana()), 0.0f, GetMaxMana()));
 	}
+	/*
 	else if (Data.EvaluatedData.Attribute == GetHealthRegenAttribute())
 	{		
 		SetHealthRegen(GetHealthRegen());
@@ -78,7 +79,7 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	else if (Data.EvaluatedData.Attribute == GetManaRegenAttribute())
 	{		
 		SetManaRegen(GetManaRegen());
-	}
+	}*/
 }
 
 void UComCombatAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)

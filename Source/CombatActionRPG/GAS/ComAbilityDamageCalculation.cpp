@@ -29,13 +29,6 @@ float UComAbilityDamageCalculation::CalculateBaseMagnitude_Implementation(const 
 		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find damage attribute set of instigator"));
 		return 0.0f;
 	}	
-/*
-	const UComCombatAttributeSet* CombatAttributeSet = Cast<UComCombatAttributeSet>(AbilitySystemComp->GetAttributeSet(UComCombatAttributeSet::StaticClass()));
-	if (CombatAttributeSet == nullptr)
-	{
-		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find combat attribute set of instigator"));
-		return 0.0f;
-	}*/
 
 	const UComGameplayAbility* Ability { Cast<UComGameplayAbility>(Spec.GetEffectContext().GetAbility()) };
 	
