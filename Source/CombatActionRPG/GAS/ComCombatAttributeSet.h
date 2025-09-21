@@ -26,7 +26,6 @@ public:
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, Heal)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, Mana)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, MaxMana)
-	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, BaseDamage)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, HealthRegen)
 	ATTRIBUTE_ACCESSORS(UComCombatAttributeSet, ManaRegen)
 	
@@ -69,10 +68,6 @@ protected:
 	
 	float HealthBeforeChange { 0.0f };	
 	float ManaBeforeChange { 0.0f };
-
-	// Base attack damage of the owner
-	UPROPERTY(BlueprintReadOnly, Category = "Attribute")
-	FGameplayAttributeData BaseDamage;
 
 	// Meta attribute that handle damage applied to the health. TODO: Rename with a more explicit name
 	UPROPERTY(BlueprintReadOnly, Category = "Attribute")

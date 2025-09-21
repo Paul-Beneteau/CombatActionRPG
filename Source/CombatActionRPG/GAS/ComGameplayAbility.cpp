@@ -13,7 +13,7 @@ const FGameplayTagContainer& UComGameplayAbility::GetAssetTagsBP() const
 	return GetAssetTags();	
 }
 
-float UComGameplayAbility::GetDamage() const
+float UComGameplayAbility::GetFinalDamage() const
 {
 	float Damage { 0.0f };
 	UGameplayEffect* GameplayEffect { GameplayEffectClass->GetDefaultObject<UGameplayEffect>() };

@@ -3,6 +3,7 @@
 #include "AbilitySystemInterface.h"
 #include "ComCombatAttributeSet.h"
 #include "ComDamageModifierAttributeSet.h"
+#include "ComGameplayAbility.h"
 #include "CombatActionRPG/CombatActionRPG.h"
 #include "CombatActionRPG/ComDataTableRow.h"
 
@@ -28,15 +29,15 @@ float UComAbilityDamageCalculation::CalculateBaseMagnitude_Implementation(const 
 		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find damage attribute set of instigator"));
 		return 0.0f;
 	}	
-
+/*
 	const UComCombatAttributeSet* CombatAttributeSet = Cast<UComCombatAttributeSet>(AbilitySystemComp->GetAttributeSet(UComCombatAttributeSet::StaticClass()));
 	if (CombatAttributeSet == nullptr)
 	{
 		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find combat attribute set of instigator"));
 		return 0.0f;
-	}
+	}*/
 
-	const UGameplayAbility* Ability { Spec.GetEffectContext().GetAbility() };
+	const UComGameplayAbility* Ability { Cast<UComGameplayAbility>(Spec.GetEffectContext().GetAbility()) };
 	
 	if (Ability == nullptr)
 	{
@@ -98,9 +99,7 @@ float UComAbilityDamageCalculation::CalculateBaseMagnitude_Implementation(const 
 		}
 	}
 	
-	float Damage = { (CombatAttributeSet->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("Damage: %f"), Damage));
+	float Damage = { (Ability->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
 	
 	// Remove decimals
 	return FMath::RoundToInt32(Damage);

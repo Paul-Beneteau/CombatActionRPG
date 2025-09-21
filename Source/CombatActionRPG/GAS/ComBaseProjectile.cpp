@@ -82,9 +82,16 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 	
 		FGameplayEffectContextHandle EffectHandle = SourceAbilitySystemComp->MakeEffectContext();
 		EffectHandle.SetAbility(InstigatorAbility);
-		
-		SourceAbilitySystemComp->ApplyGameplayEffectToTarget(HitActorGameplayEffect->GetDefaultObject<UGameplayEffect>(),
-			TargetAbilitySystemComp, 1.0f, EffectHandle);
+
+		if (HitActorGameplayEffect)
+		{
+			SourceAbilitySystemComp->ApplyGameplayEffectToTarget(HitActorGameplayEffect->GetDefaultObject<UGameplayEffect>(),
+				TargetAbilitySystemComp, 1.0f, EffectHandle);
+		}
+		else
+		{
+			UE_LOG(ComLog, Error, TEXT("AComBaseProjectile: HitActorGameplayEffect has not been set"));
+		}
 	}
 	else
 	{

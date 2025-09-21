@@ -71,10 +71,6 @@ void UComCombatAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	{		
 		SetMana(FMath::Clamp<int32>(FMath::RoundToInt(GetMana()), 0.0f, GetMaxMana()));
 	}
-	else if (Data.EvaluatedData.Attribute == GetBaseDamageAttribute())
-	{		
-		SetBaseDamage(GetBaseDamage());
-	}
 	else if (Data.EvaluatedData.Attribute == GetHealthRegenAttribute())
 	{		
 		SetHealthRegen(GetHealthRegen());
