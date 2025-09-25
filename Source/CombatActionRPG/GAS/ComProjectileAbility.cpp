@@ -11,14 +11,15 @@
 void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                             const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
 	if (CommitAbility(Handle, ActorInfo, ActivationInfo) == false)
 	{
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 		return;
 	}
 
-	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	
+	const AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
 
 	// Spawn a projectile in the direction of the cursor click
 	if (APlayerController* PlayerController { Cast<APlayerController>(Character->GetController()) } )
@@ -31,7 +32,7 @@ void UComProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 			// animation but this is not the focus of the project
 			Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 
-			FRotator CharacterRotation { (Hit.Location - GetAvatarActorFromActorInfo()->GetActorLocation()).Rotation() };
+			const FRotator CharacterRotation { (Hit.Location - GetAvatarActorFromActorInfo()->GetActorLocation()).Rotation() };
 			
 			// Rotate toward click location
 			PlayerController->SetControlRotation(CharacterRotation);
@@ -64,12 +65,13 @@ void UComProjectileAbility::OnCharacterRotated()
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);
 }
 
+// Compute the direction of each projectile and spawn them
 void UComProjectileAbility::SpawnProjectiles(int32 ProjectilesCount)
 {
 	
 	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
 	
-	TArray<FRotator> ProjectileRotations = GetProjectileRotations(ProjectilesCount);
+	TArray<FRotator> ProjectileRotations { GetProjectileRotations(ProjectilesCount) };
 
 	for (FRotator ProjectileRotation : ProjectileRotations)
 	{		
@@ -92,11 +94,13 @@ void UComProjectileAbility::SpawnProjectiles(int32 ProjectilesCount)
 	}
 }
 
+// Compute the rotation of each projectile in an array. A default spread is applied (ConeProjectileSpread) when there
+// is less than 12 projectiles, then projectiles are spawn in a circle
 TArray<FRotator> UComProjectileAbility::GetProjectileRotations(int32 ProjectilesCount)
 {
 	check (ProjectilesCount > 0);
 	
-	AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
+	const AComPlayerCharacter* Character { CastChecked<AComPlayerCharacter>(GetAvatarActorFromActorInfo()) };
 	
 	TArray<FRotator> ProjectileRotations;
 
@@ -106,7 +110,7 @@ TArray<FRotator> UComProjectileAbility::GetProjectileRotations(int32 Projectiles
 		return ProjectileRotations;
 	}
 
-	FRotator FirstProjectileRotation = Character->GetActorRotation();
+	FRotator FirstProjectileRotation { Character->GetActorRotation() };
 
 	// If there is less than 12 projectile, the spread is a predefined spread (15 degree). Else projectiles are spawn
 	// in a circle so the spread is 360 / ProjectilesCount.

@@ -122,9 +122,9 @@ UAbilitySystemComponent* AComPlayerCharacter::GetAbilitySystemComponent() const
 	return AbilitySystemComp;
 }
 
-void AComPlayerCharacter::OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability)
+void AComPlayerCharacter::OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> AbilityClass)
 {
-	AbilitySystemComp->TryActivateAbilityByClass(Ability);
+	AbilitySystemComp->TryActivateAbilityByClass(AbilityClass);
 }
 
 // Remove the current ability bound to the input action and binds the new ability
@@ -134,11 +134,38 @@ void AComPlayerCharacter::SetInputActionAbility(UInputAction* InputAction, TSubc
 	
 	if (UEnhancedInputComponent* EnhancedInputComponent { Cast<UEnhancedInputComponent>(InputComponent) })
 	{
-		// Remove previous binding
-		EnhancedInputComponent->RemoveBindingByHandle(*InputHandleMap.Find(InputAction));
+		// Iterate to find if the ability added was already bound with another input to prevent an ability to be used by
+		// 2 input actions. It is not efficient to iterate with a TMap but as there is only a few input it's fine.
+		const UInputAction* AbilityCurrentInputAction { nullptr };			
+
+		for (const TPair<TObjectPtr<UInputAction>, TSubclassOf<UGameplayAbility>>& Pair : InputAbilityMap)
+		{
+			if (Pair.Value == Ability)
+			{
+				AbilityCurrentInputAction = Pair.Key;
+			}
+		}
+
+		// Remove current input action bound to the ability if the ability was already used by an input
+		if (AbilityCurrentInputAction)
+		{
+			if (uint32* InputActionHandle = InputHandleMap.Find(AbilityCurrentInputAction))
+			{
+				EnhancedInputComponent->RemoveBindingByHandle(*InputActionHandle);
+
+				InputHandleMap.Remove(AbilityCurrentInputAction);
+				InputAbilityMap.Remove(AbilityCurrentInputAction);
+			}
+		}
+
+		if (uint32* InputActionHandle = InputHandleMap.Find(InputAction))
+		{
+			// Remove current ability bound to the input action
+			EnhancedInputComponent->RemoveBindingByHandle(*InputActionHandle);
 		
-		InputHandleMap.Remove(InputAction);
-		InputAbilityMap.Remove(InputAction);
+			InputHandleMap.Remove(InputAction);
+			InputAbilityMap.Remove(InputAction);
+		}
 		
 		// Add new binding and save the handle and ability
 		uint32 NewHandle { EnhancedInputComponent->BindAction(InputAction, ETriggerEvent::Started,
@@ -166,7 +193,7 @@ void AComPlayerCharacter::OnSetDestinationTriggered()
 		if (PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit))
 		{
 			// Move towards destination
-			FVector WorldDirection = (Hit.Location - GetActorLocation()).GetSafeNormal();
+			FVector WorldDirection { (Hit.Location - GetActorLocation()).GetSafeNormal() };
 			AddMovementInput(WorldDirection, 1.0, false);
 		}
 	}

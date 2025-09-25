@@ -4,6 +4,8 @@
 #include "Abilities/GameplayAbility.h"
 #include "ComGameplayAbility.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbilityActivated);
+
 UCLASS()
 class COMBATACTIONRPG_API UComGameplayAbility : public UGameplayAbility
 {
@@ -12,6 +14,10 @@ class COMBATACTIONRPG_API UComGameplayAbility : public UGameplayAbility
 public:
 	UComGameplayAbility();
 
+	// Send a projectile toward the player attack click direction
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+	
 	// Make ability tags visible for blueprint
 	UFUNCTION(BlueprintCallable, Category="Ability")
 	const FGameplayTagContainer& GetAssetTagsBP() const;
@@ -38,4 +44,7 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
 	TObjectPtr<UTexture2D> Icon;
+
+	UPROPERTY(BlueprintAssignable, Category="Ability")
+	FOnAbilityActivated OnAbilityActivated;
 };

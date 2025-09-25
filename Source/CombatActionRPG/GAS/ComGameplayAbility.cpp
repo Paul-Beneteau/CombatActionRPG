@@ -9,6 +9,14 @@ UComGameplayAbility::UComGameplayAbility()
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
+void UComGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+{
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	
+	OnAbilityActivated.Broadcast();
+}
+
 const FGameplayTagContainer& UComGameplayAbility::GetAssetTagsBP() const
 {	
 	return GetAssetTags();	

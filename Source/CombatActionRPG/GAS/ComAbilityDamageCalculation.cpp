@@ -9,21 +9,21 @@
 
 float UComAbilityDamageCalculation::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec& Spec) const
 {
-	IAbilitySystemInterface* Instigator = Cast<IAbilitySystemInterface>(Spec.GetEffectContext().GetInstigator());
+	const IAbilitySystemInterface* Instigator { Cast<IAbilitySystemInterface>(Spec.GetEffectContext().GetInstigator()) };
 	if (Instigator == nullptr)
 	{
 		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find gameplay effect instigator"));
 		return 0.0f;
 	}
 	
-	UAbilitySystemComponent* AbilitySystemComp = Instigator->GetAbilitySystemComponent();
+	const UAbilitySystemComponent* AbilitySystemComp { Instigator->GetAbilitySystemComponent() };
 	if (AbilitySystemComp == nullptr)
 	{
 		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find ability system component of instigator"));
 		return 0.0f;
 	}
 	
-	const UComDamageModifierAttributeSet* DamageModifierSet = Cast<UComDamageModifierAttributeSet>(AbilitySystemComp->GetAttributeSet(UComDamageModifierAttributeSet::StaticClass()));
+	const UComDamageModifierAttributeSet* DamageModifierSet { Cast<UComDamageModifierAttributeSet>(AbilitySystemComp->GetAttributeSet(UComDamageModifierAttributeSet::StaticClass())) };
 	if (DamageModifierSet == nullptr)
 	{
 		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find damage attribute set of instigator"));
@@ -37,62 +37,66 @@ float UComAbilityDamageCalculation::CalculateBaseMagnitude_Implementation(const 
 		UE_LOG(ComLog, Error, TEXT("UComAbilityDamageCalculation: Can't find gameplay ability instigator"));
 		return 0.0f;
 	}
-	// Flat damage added to the base damage 
-	float FlatDamageModifier { 0 };
 
+	// Retrieve added damage modifiers from data table
 	TArray<FComDamageModifierRow*> FlatDamageModifierRows;
 	FlatDamageModifierTable->GetAllRows<FComDamageModifierRow>(FString(""), FlatDamageModifierRows);
+
+	// Sum of flat damage added to the ability base damage
+	float FlatDamageTotal { 0.0f };
 	
 	for (FComDamageModifierRow* FlatDamageModifierRow : FlatDamageModifierRows)
 	{
-		FGameplayTag RequiredTag = FlatDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
+		const FGameplayTag RequiredTag { FlatDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag) };
 		
 		// If there is no required tag or the instigator ability has the required tag 
 		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->GetAssetTags().HasTag(RequiredTag)))
 		{
 			// Add the flat damage attribute from the instigator attribute set
-			FlatDamageModifier += FlatDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet);
+			FlatDamageTotal += FlatDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet);
 		}
 	}
-	
-	// Damage percent added additively to the total damage 
-	float AdditiveDamageModifier { 1 };
 
+	// Retrieve additive damage modifiers from data table
 	TArray<FComDamageModifierRow*> AdditiveDamageModifierRows;
 	AdditiveDamageModifierTable->GetAllRows<FComDamageModifierRow>(FString(""), AdditiveDamageModifierRows);
+
+	// Sum of additive damage modifiers applied
+	float AdditiveDamageTotal { 1.0f };
 	
 	for (FComDamageModifierRow* AdditiveDamageModifierRow : AdditiveDamageModifierRows)
 	{
-		FGameplayTag RequiredTag = AdditiveDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag);
+		const FGameplayTag RequiredTag { AdditiveDamageModifierRow->RequiredTag.Get(FGameplayTag::EmptyTag) };
 		
 		// If there is no required tag or the instigator ability has the required tag 
-		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->AbilityTags.HasTag(RequiredTag)))
+		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->GetAssetTags().HasTag(RequiredTag)))
 		{
 			// Add the additive damage attribute from the instigator attribute set
-			AdditiveDamageModifier += AdditiveDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100;
+			AdditiveDamageTotal += AdditiveDamageModifierRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100;
 		}
 	}
 
+	// Retrieve multiplicative damage modifiers from data table
 	TArray<FComDamageModifierRow*> MultiplicativeDamageModifierRows;
 	MultiplicativeDamageModifierTable->GetAllRows<FComDamageModifierRow>(FString(""), MultiplicativeDamageModifierRows);
-	
-	// Damage percent added multiplicatively to the total damage
-	float MultiplicativeDamageModifier { 1 };
 
-	// Iterates over every multiplicative damage type 
+	// Sum of multiplicative damage modifiers applied
+	float MultiplicativeDamageTotal { 1 };
+
+	// Iterates over every multiplicative damage modifiers
 	for (FComDamageModifierRow* MultiplicativeDamageRow : MultiplicativeDamageModifierRows)
 	{
-		FGameplayTag RequiredTag = MultiplicativeDamageRow->RequiredTag.Get(FGameplayTag::EmptyTag);
+		const FGameplayTag RequiredTag { MultiplicativeDamageRow->RequiredTag.Get(FGameplayTag::EmptyTag) };
 
-		// If there is no required tag or the instigator ability has the required tag 
-		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->AbilityTags.HasTag(RequiredTag)))			
+		// If there is no required tag or the instigator ability has the required tag, apply the modifer
+		if (RequiredTag == FGameplayTag::EmptyTag || (Ability->GetAssetTags().HasTag(RequiredTag)))			
 		{
-			// Add the multiplicative damage attribute from the instigator attribute set
-			MultiplicativeDamageModifier *= (1 + (MultiplicativeDamageRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100));
+			// Add the multiplicative damage modifer from the instigator attribute set to the sum
+			MultiplicativeDamageTotal *= (1 + (MultiplicativeDamageRow->DamageModifierAttribute.GetNumericValueChecked(DamageModifierSet) / 100));
 		}
 	}
 	
-	float Damage = { (Ability->GetBaseDamage() + FlatDamageModifier) * AdditiveDamageModifier * MultiplicativeDamageModifier };
+	const float Damage { (Ability->GetBaseDamage() + FlatDamageTotal) * AdditiveDamageTotal * MultiplicativeDamageTotal };
 	
 	// Remove decimals
 	return FMath::RoundToInt32(Damage);

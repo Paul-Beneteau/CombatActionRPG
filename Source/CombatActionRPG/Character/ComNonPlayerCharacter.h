@@ -9,6 +9,7 @@ class UGameplayEffect;
 class UComAbilitySystemComponent;
 class UComCombatAttributeSet;
 
+// Non player character used to test combat system
 UCLASS()
 class COMBATACTIONRPG_API AComNonPlayerCharacter : public ACharacter, public IAbilitySystemInterface
 {
@@ -24,7 +25,7 @@ public:
 	
 protected:	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
-	UComAbilitySystemComponent* AbilitySystemComp;
+	TObjectPtr<UComAbilitySystemComponent> AbilitySystemComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
 	UPROPERTY(EditDefaultsOnly, Category="GAS")

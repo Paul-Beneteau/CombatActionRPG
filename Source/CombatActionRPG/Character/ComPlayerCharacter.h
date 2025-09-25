@@ -7,15 +7,12 @@
 #include "ComPlayerCharacter.generated.h"
 
 class UGameplayEffect;
-class UComProjectileAbility;
-struct FEnhancedInputActionEventBinding;
 class UComAbilitySystemComponent;
 class UComDamageModifierAttributeSet;
 class UComCombatAttributeSet;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
-class UInputMappingContext;
 
 UCLASS()
 class COMBATACTIONRPG_API AComPlayerCharacter : public ACharacter, public IAbilitySystemInterface
@@ -25,7 +22,7 @@ class COMBATACTIONRPG_API AComPlayerCharacter : public ACharacter, public IAbili
 public:
 	// GAS Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
-	UComAbilitySystemComponent* AbilitySystemComp;
+	TObjectPtr<UComAbilitySystemComponent> AbilitySystemComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="GAS")
 	TObjectPtr<UComCombatAttributeSet> CombatAttributeSet;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="GAS")
@@ -43,7 +40,7 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UFUNCTION()
-	void OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> Ability);
+	void OnActivateAbilityStarted(const TSubclassOf<UGameplayAbility> AbilityClass);
 
 	// Remove the current ability bound to the input action and binds the new ability
 	UFUNCTION(BlueprintCallable)

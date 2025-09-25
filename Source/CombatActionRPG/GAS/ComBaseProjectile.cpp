@@ -70,8 +70,8 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		UE_LOG(ComLog, Warning, TEXT("AComBaseProjectile: HitActorEffect has not been set"));
 	}
 
-	AComPlayerCharacter* PlayerCharacter { Cast<AComPlayerCharacter>(GetInstigator())};
-	AComNonPlayerCharacter* NonPlayerCharacter { Cast<AComNonPlayerCharacter>(OtherActor)};
+	const AComPlayerCharacter* PlayerCharacter { Cast<AComPlayerCharacter>(GetInstigator())};
+	const AComNonPlayerCharacter* NonPlayerCharacter { Cast<AComNonPlayerCharacter>(OtherActor)};
 	
 	if (PlayerCharacter && NonPlayerCharacter)
 	{
@@ -80,7 +80,7 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		UAbilitySystemComponent* SourceAbilitySystemComp = PlayerCharacter->GetAbilitySystemComponent();
 		check(SourceAbilitySystemComp);
 	
-		FGameplayEffectContextHandle EffectHandle = SourceAbilitySystemComp->MakeEffectContext();
+		FGameplayEffectContextHandle EffectHandle { SourceAbilitySystemComp->MakeEffectContext() };
 		EffectHandle.SetAbility(InstigatorAbility);
 
 		if (HitActorGameplayEffect)
@@ -98,5 +98,5 @@ void AComBaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent
 		UE_LOG(ComLog, Error, TEXT("AComBaseProjectile: Can't find instigator or target"));
 	}	
 	
-	//Destroy();
+	Destroy();
 }

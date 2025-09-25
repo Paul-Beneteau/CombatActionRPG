@@ -28,7 +28,7 @@ float UComAbilityCooldownCalculation::CalculateBaseMagnitude_Implementation(cons
 		if (float AttackSpeed { AbilitySystemComp->GetNumericAttribute(UComCombatAttributeSet::GetAttackSpeedAttribute()) })
 		{
 			// Attack speed is the number of attack per seconds. The cooldown in second is one second divided by the number of attack per seconds
-			Cooldown = 1 / AttackSpeed;
+			Cooldown = 1.0f / AttackSpeed;
 		}
 	}
 
